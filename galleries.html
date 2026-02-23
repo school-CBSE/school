@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galleries - Vivekanandha School - CBSE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .editable-hover:hover {
+            background-color: #eff6ff;
+            cursor: pointer;
+            outline: 2px dashed #3b82f6;
+        }
+        .edit-icon {
+            display: none;
+        }
+        .admin-mode .edit-icon {
+            display: block;
+        }
+        .image-container {
+            position: relative;
+        }
+        .image-container:hover .edit-icon {
+            opacity: 1;
+        }
+        .gallery-image {
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .gallery-image:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Lightbox styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+        }
+        .lightbox.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            z-index: 10000;
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            padding: 20px;
+            user-select: none;
+            z-index: 10000;
+        }
+        .lightbox-prev {
+            left: 20px;
+        }
+        .lightbox-next {
+            right: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Add Image Modal -->
+    <div id="addImageModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Add New Image</h2>
+                <button onclick="closeAddImageModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            
+            <form id="addImageForm" onsubmit="handleAddImage(event)">
+                <!-- Image Preview -->
+                <div id="imagePreviewContainer" class="mb-6 hidden">
+                    <img id="imagePreview" class="w-full h-64 object-cover rounded-lg border-2 border-gray-300">
+                    <button type="button" onclick="clearImage()" class="mt-3 text-sm text-red-500 hover:text-red-700 block mx-auto">Remove Image</button>
+                </div>
+
+                <!-- Upload Area -->
+                <div id="imageUploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer" onclick="document.getElementById('galleryImageInput').click()">
+                    <div class="text-5xl mb-3">🖼️</div>
+                    <p class="text-gray-600 text-base font-semibold mb-2">Click to upload image</p>
+                    <p class="text-gray-400 text-sm">Supported formats: JPEG, JPG, PNG, GIF, WEBP</p>
+                    <p class="text-gray-400 text-sm">Maximum file size: 10MB</p>
+                </div>
+                <input type="file" id="galleryImageInput" accept=".jpg,.jpeg,.png,.gif,.webp" class="hidden" onchange="handleImageSelect(event)" required>
+
+                <!-- Caption -->
+                <div class="mt-6 mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Image Caption (Optional)</label>
+                    <input type="text" id="imageCaption" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Enter image caption">
+                </div>
+
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                    ➕ Add Image to Gallery
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">×</span>
+        <span class="lightbox-nav lightbox-prev" onclick="changeImage(-1)">❮</span>
+        <span class="lightbox-nav lightbox-next" onclick="changeImage(1)">❯</span>
+        <img id="lightbox-img" class="lightbox-content" src="" alt="">
+    </div>
+
+    <!-- Admin Panel (secret keyword: type "School" anywhere on the page) -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        <button id="adminBtn" class="hidden"></button>
+        <div id="adminPanel" class="hidden flex gap-2">
+            <button id="saveBtn" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
+                💾 Save Changes
+            </button>
+            <button id="logoutBtn" class="px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
+                🚪 Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                    <input type="password" id="passwordInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Enter admin password">
+                    <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
+                    <p class="text-gray-500 text-xs mt-2">Demo password: admin123</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-red-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex items-center gap-4">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                <img src="file:///D:\Mano School\School logo.jpg" alt="School Logo" class="w-full h-full object-contain">
+            </div>
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold">VIVEKANANDHA SCHOOL - CBSE</h1>
+                <p class="text-sm opacity-90">Affiliated to Central Board of Secondary Education - New Delhi | Affiliation No.930011</p>
+            </div>
+        </div>
+        
+        <nav class="bg-red-700">
+            <div class="container mx-auto px-4">
+                <ul class="flex gap-6 text-sm font-semibold flex-wrap">
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='school-website.html'">HOME</li>
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='about-us.html'">ABOUT US</li>
+                    <!-- <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors">MANDATORY DISCLOSURE</li> -->
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='facilities.html'">FACILITIES</li>
+                    <li class="py-3 bg-red-800 px-3 cursor-pointer transition-colors">GALLERIES</li>
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors">ADMISSION</li>
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='contact-us.html'">CONTACT US</li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-3">
+            <p class="text-sm text-gray-600">
+                <span class="text-blue-500 cursor-pointer hover:underline" onclick="window.location.href='school-website.html'">Home</span> 
+                <span class="mx-2">></span> 
+                <span class="text-gray-800 font-semibold">Galleries</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">Galleries</h1>
+            <div id="addImageBtnContainer" class="hidden">
+                <button onclick="openAddImageModal()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
+                    ➕ Add New Image
+                </button>
+            </div>
+        </div>
+
+        <p id="galleryDesc" class="text-gray-600 mb-8 text-lg editable">Explore our vibrant school life through these memorable moments captured during various events, activities, and celebrations.</p>
+
+        <!-- Empty State -->
+        <div id="emptyGalleryState" class="hidden text-center py-20 bg-white rounded-lg shadow-md">
+            <div class="text-7xl mb-4">📷</div>
+            <h3 class="text-2xl font-bold text-gray-400 mb-2">No Images in Gallery</h3>
+            <p class="text-gray-500">Images will appear here once added by admin</p>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Gallery images will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-4xl">🏫</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4">VIVEKANANDHA SCHOOL - CBSE</h3>
+                    <p id="address" class="text-gray-300 text-sm mb-4 editable">Gopalankottai Road,<br>Kysnthullipalayam,<br>Puducherry - 605 009</p>
+                    <p id="email" class="text-gray-300 text-sm mb-2 editable"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c99fa0bfaca2a8a7a8ada1a8aaa5a8baba89aea4a8a0a5e7aaa6a4">[email&#160;protected]</a></p>
+                    <p id="phone" class="text-gray-300 text-sm editable">+91 0413 2295657 , +91 9944938761</p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p id="copyright" class="editable">Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by HIGHMON MEDIAS</p>
+            </div>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        const ADMIN_PASSWORD = 'admin123';
+        const MAX_IMAGES = 100;
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        let isAdmin = false;
+        let galleryImages = [];
+        let currentLightboxIndex = 0;
+
+        // Secret keyword trigger - type "School" anywhere on the page
+        let keyBuffer = '';
+        const SECRET_KEYWORD = 'School';
+        document.addEventListener('keypress', (e) => {
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            keyBuffer += e.key;
+            if (keyBuffer.length > SECRET_KEYWORD.length) {
+                keyBuffer = keyBuffer.slice(-SECRET_KEYWORD.length);
+            }
+            if (keyBuffer === SECRET_KEYWORD) {
+                keyBuffer = '';
+                document.getElementById('loginModal').classList.remove('hidden');
+                document.getElementById('passwordInput').focus();
+            }
+        });
+
+        // Modal controls (adminBtn is hidden, kept for internal use)
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('adminBtn').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                enableEditMode();
+                document.getElementById('passwordInput').value = '';
+                showMessage('Welcome Admin! You can now manage gallery.', 'success');
+            } else {
+                document.getElementById('errorMsg').textContent = 'Incorrect password! Try again.';
+                document.getElementById('errorMsg').classList.remove('hidden');
+                document.getElementById('passwordInput').value = '';
+            }
+        });
+
+        // Save button
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            saveAllChanges();
+            showMessage('All changes saved successfully! ✓', 'success');
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Do you want to save changes before logging out?')) {
+                saveAllChanges();
+                showMessage('Changes saved! Logging out...', 'success');
+                setTimeout(() => {
+                    logout();
+                }, 1500);
+            } else {
+                logout();
+            }
+        });
+
+        function logout() {
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminBtn').classList.remove('hidden');
+            disableEditMode();
+            showMessage('Logged out successfully', 'info');
+        }
+
+        // Enable edit mode
+        function enableEditMode() {
+            document.body.classList.add('admin-mode');
+            document.getElementById('addImageBtnContainer').classList.remove('hidden');
+            
+            document.querySelectorAll('.editable').forEach(element => {
+                element.classList.add('editable-hover');
+                element.addEventListener('click', handleEditClick);
+            });
+            
+            renderGallery();
+        }
+
+        // Disable edit mode
+        function disableEditMode() {
+            document.body.classList.remove('admin-mode');
+            document.getElementById('addImageBtnContainer').classList.add('hidden');
+            
+            document.querySelectorAll('.editable').forEach(element => {
+                element.classList.remove('editable-hover');
+                element.removeEventListener('click', handleEditClick);
+            });
+            
+            renderGallery();
+        }
+
+        // Handle edit click
+        function handleEditClick(e) {
+            if (!isAdmin) return;
+            e.stopPropagation();
+            editText(this);
+        }
+
+        // Edit text function
+        function editText(element) {
+            if (!isAdmin) return;
+            
+            const currentHTML = element.innerHTML;
+            const currentText = element.textContent;
+            const isMultiline = currentHTML.includes('<br>') || element.id === 'galleryDesc' || element.id === 'address';
+            
+            if (isMultiline) {
+                const textarea = document.createElement('textarea');
+                textarea.value = currentHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+                textarea.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none';
+                textarea.rows = 3;
+                
+                element.replaceWith(textarea);
+                textarea.focus();
+                
+                const saveChanges = () => {
+                    element.innerHTML = textarea.value.replace(/\n/g, '<br>');
+                    textarea.replaceWith(element);
+                    element.addEventListener('click', handleEditClick);
+                };
+                
+                textarea.addEventListener('blur', saveChanges);
+                
+                textarea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        element.innerHTML = currentHTML;
+                        textarea.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    }
+                });
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentText;
+                input.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none';
+                
+                element.replaceWith(input);
+                input.focus();
+                input.select();
+                
+                const saveChanges = () => {
+                    element.textContent = input.value;
+                    input.replaceWith(element);
+                    element.addEventListener('click', handleEditClick);
+                };
+                
+                input.addEventListener('blur', saveChanges);
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        saveChanges();
+                    } else if (e.key === 'Escape') {
+                        element.textContent = currentText;
+                        input.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    }
+                });
+            }
+        }
+
+        // ============ IMAGE MANAGEMENT FUNCTIONS ============
+
+        // Open add image modal
+        function openAddImageModal() {
+            if (galleryImages.length >= MAX_IMAGES) {
+                showMessage(`Maximum ${MAX_IMAGES} images allowed`, 'error');
+                return;
+            }
+            document.getElementById('addImageModal').classList.remove('hidden');
+        }
+
+        // Close add image modal
+        function closeAddImageModal() {
+            document.getElementById('addImageModal').classList.add('hidden');
+            document.getElementById('addImageForm').reset();
+            clearImage();
+        }
+
+        // Handle image selection
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size
+            if (file.size > MAX_FILE_SIZE) {
+                showMessage('Image size should be less than 10MB', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('Please upload a valid image file (JPEG, PNG, GIF, WEBP)', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageDataUrl = e.target.result;
+                document.getElementById('imagePreview').src = imageDataUrl;
+                document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                document.getElementById('imageUploadArea').classList.add('hidden');
+            };
+            reader.onerror = function() {
+                showMessage('Error reading image file', 'error');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Clear image
+        function clearImage() {
+            document.getElementById('galleryImageInput').value = '';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imageUploadArea').classList.remove('hidden');
+        }
+
+        // Handle add image form submission
+        function handleAddImage(event) {
+            event.preventDefault();
+
+            if (galleryImages.length >= MAX_IMAGES) {
+                showMessage(`Maximum ${MAX_IMAGES} images allowed`, 'error');
+                return;
+            }
+
+            const imageDataUrl = document.getElementById('imagePreview').src;
+            const caption = document.getElementById('imageCaption').value.trim();
+
+            if (!imageDataUrl) {
+                showMessage('Please upload an image', 'error');
+                return;
+            }
+
+            const newImage = {
+                id: Date.now(),
+                src: imageDataUrl,
+                caption: caption || '',
+                timestamp: new Date().toISOString()
+            };
+
+            galleryImages.push(newImage);
+            renderGallery();
+            closeAddImageModal();
+            showMessage('Image added successfully!', 'success');
+            
+            // Auto-save
+            saveAllChanges();
+        }
+
+        // Render gallery
+        function renderGallery() {
+            const emptyState = document.getElementById('emptyGalleryState');
+            const galleryGrid = document.getElementById('galleryGrid');
+
+            if (galleryImages.length === 0) {
+                emptyState.classList.remove('hidden');
+                galleryGrid.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                galleryGrid.classList.remove('hidden');
+                
+                galleryGrid.innerHTML = galleryImages.map((image, index) => `
+                    <div class="gallery-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all">
+                        <div class="image-container">
+                            <img src="${image.src}" alt="${image.caption}" class="gallery-image w-full h-64 object-cover" onclick="openLightbox(${index})">
+                            ${isAdmin ? `
+                                <button onclick="deleteImage(${image.id})" class="edit-icon absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition-colors">
+                                    ×
+                                </button>
+                            ` : ''}
+                        </div>
+                        ${image.caption ? `
+                            <div class="p-4">
+                                <p class="text-sm text-gray-600 text-center">${image.caption}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Delete image
+        function deleteImage(id) {
+            if (!isAdmin) return;
+            
+            if (confirm('Are you sure you want to delete this image?')) {
+                galleryImages = galleryImages.filter(img => img.id !== id);
+                renderGallery();
+                showMessage('Image deleted successfully', 'success');
+                saveAllChanges();
+            }
+        }
+
+        // ============ LIGHTBOX FUNCTIONS ============
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = galleryImages[index].src;
+            lightbox.classList.add('active');
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
+        }
+
+        function changeImage(direction) {
+            currentLightboxIndex += direction;
+            
+            if (currentLightboxIndex < 0) {
+                currentLightboxIndex = galleryImages.length - 1;
+            } else if (currentLightboxIndex >= galleryImages.length) {
+                currentLightboxIndex = 0;
+            }
+            
+            document.getElementById('lightbox-img').src = galleryImages[currentLightboxIndex].src;
+        }
+
+        // Keyboard navigation for lightbox
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    changeImage(-1);
+                } else if (e.key === 'ArrowRight') {
+                    changeImage(1);
+                }
+            }
+        });
+
+        // Close lightbox when clicking outside image
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') {
+                closeLightbox();
+            }
+        });
+
+        // Show message
+        function showMessage(text, type = 'success') {
+            const msg = document.createElement('div');
+            msg.textContent = text;
+            let bgColor = 'bg-green-500';
+            if (type === 'error') bgColor = 'bg-red-500';
+            if (type === 'info') bgColor = 'bg-blue-500';
+            msg.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+
+        // Save all changes
+        function saveAllChanges() {
+            const data = {
+                galleryDesc: document.getElementById('galleryDesc').innerHTML,
+                address: document.getElementById('address').innerHTML,
+                email: document.getElementById('email').innerHTML,
+                phone: document.getElementById('phone').innerHTML,
+                copyright: document.getElementById('copyright').innerHTML,
+                galleryImages: galleryImages
+            };
+            
+            localStorage.setItem('galleriesPageData', JSON.stringify(data));
+        }
+
+        // Load saved changes
+        function loadSavedChanges() {
+            const savedData = localStorage.getItem('galleriesPageData');
+            if (!savedData) {
+                renderGallery();
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(savedData);
+                
+                if (data.galleryDesc) document.getElementById('galleryDesc').innerHTML = data.galleryDesc;
+                if (data.address) document.getElementById('address').innerHTML = data.address;
+                if (data.email) document.getElementById('email').innerHTML = data.email;
+                if (data.phone) document.getElementById('phone').innerHTML = data.phone;
+                if (data.copyright) document.getElementById('copyright').innerHTML = data.copyright;
+                
+                if (data.galleryImages && Array.isArray(data.galleryImages)) {
+                    galleryImages = data.galleryImages;
+                }
+                
+                renderGallery();
+                
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+          
+            }
+        }
+
+        // Load saved changes on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedChanges();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Vivekanandha School - CBSE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .editable-hover:hover {
+            background-color: #eff6ff;
+            cursor: pointer;
+            outline: 2px dashed #3b82f6;
+        }
+        .edit-icon {
+            display: none;
+        }
+        .admin-mode .edit-icon {
+            display: block;
+        }
+        .image-container {
+            position: relative;
+        }
+        .image-container:hover .edit-icon {
+            opacity: 1;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        /* Hide PDF toolbar */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 800px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #525659;
+        }
+        
+        .pdf-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .pdf-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #525659;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Add Staff Modal -->
+    <div id="addStaffModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Add Staff Member</h2>
+                <button id="closeStaffModal" onclick="closeAddStaffModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            
+            <form id="addStaffForm" onsubmit="handleAddStaff(event)">
+                <!-- Photo Upload -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Photo *</label>
+                    <div id="photoPreviewContainer" class="mb-3 hidden">
+                        <img id="photoPreview" class="w-32 h-40 object-cover rounded-lg border-2 border-gray-300 mx-auto">
+                        <button type="button" onclick="clearPhoto()" class="mt-2 text-sm text-red-500 hover:text-red-700 block mx-auto">Remove Photo</button>
+                    </div>
+                    <div id="photoUploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer" onclick="document.getElementById('staffPhotoInput').click()">
+                        <div class="text-4xl mb-2">📷</div>
+                        <p class="text-gray-600 text-sm mb-2">Click to upload photo</p>
+                        <p class="text-gray-400 text-xs">JPEG, JPG, PNG, GIF, WEBP (max 5MB)</p>
+                        <p class="text-gray-400 text-xs">Recommended: Passport size ratio</p>
+                    </div>
+                    <input type="file" id="staffPhotoInput" accept=".jpg,.jpeg,.png,.gif,.webp" class="hidden" onchange="handlePhotoSelect(event)" required>
+                </div>
+
+                <!-- Name -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Full Name *</label>
+                    <input type="text" id="staffName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Enter staff name" required>
+                </div>
+
+                <!-- Designation -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Designation *</label>
+                    <input type="text" id="staffDesignation" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="e.g., Principal, Teacher, etc." required>
+                </div>
+
+                <!-- Subject/Department (Optional) -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Subject/Department</label>
+                    <input type="text" id="staffSubject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="e.g., Mathematics, Science (optional)">
+                </div>
+
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                    ➕ Add Staff Member
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel (secret keyword: type "School" anywhere on the page) -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        <button id="adminBtn" class="hidden"></button>
+        <div id="adminPanel" class="hidden flex gap-2">
+            <button id="saveBtn" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
+                💾 Save Changes
+            </button>
+            <button id="logoutBtn" class="px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
+                🚪 Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                    <input type="password" id="passwordInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Enter admin password">
+                    <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
+                    <p class="text-gray-500 text-xs mt-2">Demo password: admin123</p>
+                </div>
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-red-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4 flex items-center gap-4">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                <img src="file:///D:\Mano School\School logo.jpg" alt="School Logo" class="w-full h-full object-contain">
+            </div>
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold">VIVEKANANDHA SCHOOL - CBSE</h1>
+                <p class="text-sm opacity-90">Affiliated to Central Board of Secondary Education - New Delhi | Affiliation No.930011</p>
+            </div>
+        </div>
+        
+        <nav class="bg-red-700">
+            <div class="container mx-auto px-4">
+                <ul class="flex gap-6 text-sm font-semibold flex-wrap">
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='school-website.html'">HOME</li>
+                    <li class="py-3 bg-red-800 px-3 cursor-pointer transition-colors">ABOUT US</li>
+                    <!-- <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors">MANDATORY DISCLOSURE</li> -->
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='facilities.html'">FACILITIES</li>
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='galleries.html'">GALLERIES</li>
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors">ADMISSION</li>
+                    <li class="py-3 hover:bg-red-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='contact-us.html'">CONTACT US</li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-3">
+            <p class="text-sm text-gray-600">
+                <span class="text-blue-500 cursor-pointer hover:underline" onclick="window.location.href='school-website.html'">Home</span> 
+                <span class="mx-2">></span> 
+                <span class="text-gray-800 font-semibold">About us</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex gap-8 flex-col lg:flex-row">
+            <!-- Sidebar -->
+            <div class="lg:w-64">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden sticky top-4">
+                    <div class="bg-teal-500 text-white px-6 py-4">
+                        <h3 class="font-bold text-lg">About us</h3>
+                    </div>
+                    <ul class="py-2">
+                        <li id="aboutUsTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-teal-500 bg-teal-50" onclick="showSection('aboutUs')">About us</li>
+                        <li id="schoolInfoTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('schoolInfo')">School Information</li>
+                        <li id="historyTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('history')">History</li>
+                        <li id="infrastructureTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('infrastructure')">Infrastructure</li>
+                        <li id="staffTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('staff')">Staff Members</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1">
+                <!-- About Us Section -->
+                <div id="aboutUsSection" class="content-section">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">About us</h1>
+
+                    <!-- Mission & Vision Section -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="image-container">
+                            <img id="missionImage" src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=400&fit=crop" alt="Our Mission Vision" class="w-full h-80 object-cover">
+                            <button class="edit-icon absolute top-4 right-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg" onclick="editImage('missionImage')">📷 Change Image</button>
+                            <div class="absolute top-1/2 right-8 transform -translate-y-1/2 bg-purple-900 bg-opacity-90 text-white px-12 py-8 rounded-lg">
+                                <h2 id="missionVisionTitle" class="text-4xl font-bold editable">OUR MISSION<br>VISION</h2>
+                            </div>
+                        </div>
+                        
+                        <div class="p-8">
+                            <h3 id="missionHeading" class="text-2xl font-bold text-gray-800 mb-4 editable">Our Mission</h3>
+                            <p id="missionText" class="text-gray-700 mb-6 leading-relaxed editable">Students are encouraged to bring out their inherent Talents to try for Excellence in all their attempts and emerge as the Best Citizen of tomorrow.</p>
+                            
+                            <h3 id="visionHeading" class="text-2xl font-bold text-gray-800 mb-4 editable">Our Vision</h3>
+                            <p id="visionText" class="text-gray-700 mb-6 leading-relaxed editable">Our vision is to make Vivekanandha School a world campus for anyone to learn and realize their dreams for higher education and enhanced career in School Education.</p>
+                            
+                            <h3 id="curriculumHeading" class="text-2xl font-bold text-gray-800 mb-4 editable">Medium of Instruction and Curriculum</h3>
+                            <p id="curriculumText" class="text-gray-700 mb-6 leading-relaxed editable">The medium of instruction is English. The school follows the curriculum and syllabus as prescribed by the Central Board of Secondary Education, New Delhi.</p>
+                            
+                            <h3 id="standardHeading" class="text-2xl font-bold text-gray-800 mb-4 editable">I to X STD</h3>
+                            <p id="standardText1" class="text-gray-700 mb-4 leading-relaxed editable">As per the CBSE directive a system of Continuous Comprehensive Evaluation (CCE) is being followed.</p>
+                            
+                            <p id="standardText2" class="text-gray-700 mb-4 leading-relaxed editable">A system of Continuous Comprehensive Evaluation (CCE) which is purely a grading system with four Formative Assessments and two Summative Assessments. This includes assessment in scholastic as well as co-scholastic aspects. Scholastic aspect includes life skills, co-curricular, attributes and values. The assessment will be indicated in grades.</p>
+                            
+                            <p id="standardText3" class="text-gray-700 leading-relaxed editable">The grading scale for the scholastic domain is a ten point grading scale and for non-scholastics a five point grading scale will be followed. This system attempts to shift the emphasis from testing to holistic learning. It aims at creating good citizens possessing sound health, appropriate skills and desirable qualities besides academic excellence.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- School Information Section -->
+                <div id="schoolInfoSection" class="content-section hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">School Information</h1>
+                    <div class="bg-white rounded-lg shadow-md p-8">
+                        <!-- Public View - Shows when not admin and no PDF -->
+                        <div id="publicNoDataView" class="text-center py-16">
+                            <div class="text-6xl mb-4">📄</div>
+                            <h3 class="text-2xl font-bold text-gray-400 mb-2">UPCOMING.............</h3>
+                            <p class="text-gray-500">School information will be available soon</p>
+                        </div>
+
+                        <!-- Admin Upload Area - Shows only when admin is logged in and no PDF -->
+                        <div id="pdfUploadArea" class="hidden mb-6">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                                <div class="mb-4">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-600 mb-4 font-semibold">Upload School Information PDF</p>
+                                <input type="file" id="pdfFileInput" accept=".pdf" class="hidden" onchange="handlePDFUpload(event)">
+                                <button onclick="document.getElementById('pdfFileInput').click()" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors">
+                                    📁 Choose PDF File
+                                </button>
+                                <button id="uploadPDFUrlBtn" onclick="uploadPDFUrl()" class="ml-2 px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition-colors">
+                                    🔗 Enter PDF URL
+                                </button>
+                                <p class="text-sm text-gray-500 mt-4">Or drag and drop a PDF file here</p>
+                            </div>
+                        </div>
+
+                        <!-- PDF Viewer - Shows when PDF is uploaded -->
+                        <div id="pdfViewerContainer" class="hidden">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-gray-800">📋 School Information Document</h3>
+                                <button id="removePDFBtn" onclick="removePDF()" class="hidden px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors">
+                                    🗑️ Remove PDF
+                                </button>
+                            </div>
+                            <div class="pdf-container">
+                                <iframe id="pdfViewer"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div id="historySection" class="content-section hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">About us</h1>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <!-- History Image -->
+                        <div class="image-container">
+                            <img id="historyImage" src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&h=400&fit=crop" alt="School Building" class="w-full h-96 object-cover">
+                            <button class="edit-icon absolute top-4 right-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg" onclick="editImage('historyImage')">📷 Change Image</button>
+                        </div>
+                        
+                        <div class="p-8">
+                            <h2 id="historyTitle" class="text-3xl font-bold text-gray-800 mb-6 editable">History</h2>
+                            
+                            <p id="historyPara1" class="text-gray-700 mb-6 leading-relaxed editable">Marching towards another milestone of Vivekanandha Higher Secondary School, Sellaperumalpet, Lawspet, Puducherry, we continue to move forward towards our goal in futuristic education.</p>
+                            
+                            <p id="historyPara2" class="text-gray-700 mb-6 leading-relaxed editable">Vivekanandha Group of Institutions is established with a mission to provide knowledge, intelligence, spirituality and leadership qualities to every student. Care is taken to enhance the overall personality of an individual, so that excellence in all our endeavours becomes a norm; creativity and innovation become the second habit, and character, integrity and capability go together.</p>
+                            
+                            <p id="historyPara3" class="text-gray-700 mb-6 leading-relaxed editable">Identifying the potential talent in a child is an art and grooming this talent through scientific methods makes the student achieve great results, which inspire the entire teaching fraternity of Vivekanandha group.</p>
+                            
+                            <p id="historyPara4" class="text-gray-700 mb-6 leading-relaxed editable">Vivekanandha provides a safe and first class teaching-learning environment that includes comprehensive curriculum, innovative faculty, appropriate technology and equipments, diverse modes of instructions and up-to-date support services. Since its establishment in the year 1986 with the Motto "Arise, Awake and stop not till the goal is achieved" all our attention is focused on excellence.</p>
+                            
+                            <p id="historyPara5" class="text-gray-700 leading-relaxed editable">Students are always encouraged to strive for excellence in every way. Excellence is never achieved in one giant step, but emerges with one small step at a time. Our journey towards the success, with all our attempts fine tuned towards the avowed goal enabled us to get anchored in excellence forever.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Infrastructure Section -->
+                <div id="infrastructureSection" class="content-section hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">About us</h1>
+                    
+                    <!-- School Campus -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="p-8">
+                            <h2 id="campusTitle" class="text-2xl font-bold text-gray-800 mb-4 editable">School Campus</h2>
+                            <p id="campusText" class="text-gray-700 mb-6 leading-relaxed editable">The School is erected in a calm and ideal atmosphere, promising a better teaching-learning process. The School set-up is spread in vast 3 acres of greenery in the way. The School ambience has been set enviably.</p>
+                        </div>
+                        
+                        <div class="image-container mb-6">
+                            <img id="campusImage" src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1200&h=400&fit=crop" alt="School Campus" class="w-full h-80 object-cover">
+                            <button class="edit-icon absolute top-4 right-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg" onclick="editImage('campusImage')">📷 Change Image</button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                                <div class="flex items-center gap-3 text-white">
+                                    <div class="w-12 h-12 bg-red-600 rounded flex items-center justify-center">
+                                        <span class="text-2xl">▶</span>
+                                    </div>
+                                    <span id="campusLabel" class="text-lg font-bold editable">MODERN INFRASTRUCTURE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Room -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="image-container mb-6">
+                            <img id="smartRoomImage" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&h=400&fit=crop" alt="Smart Class" class="w-full h-80 object-cover">
+                            <button class="edit-icon absolute top-4 right-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg" onclick="editImage('smartRoomImage')">📷 Change Image</button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                                <div class="flex items-center gap-3 text-white">
+                                    <div class="w-12 h-12 bg-red-600 rounded flex items-center justify-center">
+                                        <span class="text-2xl">▶</span>
+                                    </div>
+                                    <span id="smartRoomLabel" class="text-lg font-bold editable">TATA EDGE Smart Class</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-8">
+                            <h2 id="smartRoomTitle" class="text-2xl font-bold text-gray-800 mb-4 editable">Smart Room</h2>
+                            <p id="smartRoomText" class="text-gray-700 leading-relaxed editable">The usage, characteristics of our classrooms are very much comfortable to accommodate all students' interest. We incorporate language encouraged, Apt creativity, Each classroom is well equipped with requisite teaching aids and materials like, digital boards, over head projector, Charts are setup as their required grade wise activity materials. In addition, adhering to the global education paradigm, though in appendices, the A.V learning aspect is provided for making use of the nature center. Social Science with its seminar and overviews of the real resources.</p>
+                        </div>
+                    </div>
+
+                    <!-- Laboratory -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="image-container mb-6">
+                            <img id="labImage" src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&h=400&fit=crop" alt="Laboratory" class="w-full h-80 object-cover">
+                            <button class="edit-icon absolute top-4 right-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg" onclick="editImage('labImage')">📷 Change Image</button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                                <div class="flex items-center gap-3 text-white">
+                                    <div class="w-12 h-12 bg-red-600 rounded flex items-center justify-center">
+                                        <span class="text-2xl">▶</span>
+                                    </div>
+                                    <span id="labLabel" class="text-lg font-bold editable">INTEGRATED ROBOTICS & SCIENCE LABS</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-8">
+                            <h2 id="labTitle" class="text-2xl font-bold text-gray-800 mb-4 editable">Laboratory</h2>
+                            <p id="labText" class="text-gray-700 leading-relaxed editable">Planning to meet the science to discover for practical oversight i.wage classroom of education, we have taken steps ready to settle our aspirations with a flavor of the set of teaching technology. The Physics, Chemistry, Biology, and Computer labs are being well-maintained, which uphold the scientific mindset and of the students. Integrated Robotics lab acquired the students' curiosity with active Participant on it.</p>
+                        </div>
+                    </div>
+
+                    <!-- Library -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="p-8">
+                            <h2 id="libraryTitle" class="text-2xl font-bold text-gray-800 mb-4 editable">Library</h2>
+                            <p id="libraryText1" class="text-gray-700 mb-4 leading-relaxed editable">Our air-conditioned Library is well equipped with a variety of books for the seekers of knowledge. Right from lay-readers, EFL (Language) conscious has been drawing the development of library. The School e-course home ATLAS (Atlas Ebooks for course titles and info internet forums, encyclopedias are to be Explored). Just by making a click, users can access any information in the world.</p>
+                            
+                            <p id="libraryText2" class="text-gray-700 mb-6 leading-relaxed editable">Most of them we send publications. A special community feature of the library is the circulation of it. Has facility of stationary, books, (Social books, Text Books, Culture book) & Lib. Misceellance in Competitive books like Bank, SSC, Railways, general, TNPSC and UPSC.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 px-8 pb-8">
+                            <div class="image-container">
+                                <img id="libraryImage1" src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=600&h=400&fit=crop" alt="Library 1" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('libraryImage1')">📷</button>
+                            </div>
+                            <div class="image-container">
+                                <img id="libraryImage2" src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600&h=400&fit=crop" alt="Library 2" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('libraryImage2')">📷</button>
+                            </div>
+                            <div class="image-container">
+                                <img id="libraryImage3" src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=600&h=400&fit=crop" alt="Library 3" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('libraryImage3')">📷</button>
+                            </div>
+                            <div class="image-container">
+                                <img id="libraryImage4" src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop" alt="Library 4" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('libraryImage4')">📷</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extra Curricular Activities -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                        <div class="p-8">
+                            <h2 id="extraCurricularTitle" class="text-2xl font-bold text-gray-800 mb-4 editable">Extra Curricular Activities</h2>
+                            <p id="extraCurricularText1" class="text-gray-700 mb-4 leading-relaxed editable">Pupils are encouraged to participate in extra-curricular activities in the School Such as an essential aspect of their physical activities and accustomed to in the studies. Both of these activities, awareness in the total, a child should live in multi-dimensional life.</p>
+                            
+                            <p id="extraCurricularText2" class="text-gray-700 mb-6 leading-relaxed editable">The academic arena are globalize of it and Family come one as adult Henary chronogm acadonomic awareness programme. mell out cross and other areas school Activities.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 px-8 pb-8">
+                            <div class="image-container">
+                                <img id="activityImage1" src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=600&h=400&fit=crop" alt="Activity 1" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('activityImage1')">📷</button>
+                            </div>
+                            <div class="image-container">
+                                <img id="activityImage2" src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop" alt="Activity 2" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('activityImage2')">📷</button>
+                            </div>
+                            <div class="image-container">
+                                <img id="activityImage3" src="https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=600&h=400&fit=crop" alt="Activity 3" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('activityImage3')">📷</button>
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                                    <div class="flex items-center gap-2 text-white">
+                                        <div class="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
+                                            <span class="text-lg">▶</span>
+                                        </div>
+                                        <span id="activityLabel3" class="text-sm font-bold editable">ACTIVITIES</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="image-container">
+                                <img id="activityImage4" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&h=400&fit=crop" alt="Activity 4" class="w-full h-64 object-cover rounded-lg">
+                                <button class="edit-icon absolute top-2 right-2 p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg" onclick="editImage('activityImage4')">📷</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Visual & Performing Arts -->
+                        <div class="image-container">
+                            <img id="artsImage" src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=1200&h=500&fit=crop" alt="Visual & Performing Arts" class="w-full h-96 object-cover">
+                            <button class="edit-icon absolute top-4 right-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-lg" onclick="editImage('artsImage')">📷 Change Image</button>
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                                <div class="flex items-center gap-3 text-white">
+                                    <div class="w-12 h-12 bg-red-600 rounded flex items-center justify-center">
+                                        <span class="text-2xl">▶</span>
+                                    </div>
+                                    <span id="artsLabel" class="text-lg font-bold editable">VISUAL & PERFORMING ARTS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Members Section -->
+                <div id="staffSection" class="content-section hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Staff Members</h1>
+                    <div class="bg-white rounded-lg shadow-md p-8">
+                        <!-- Admin Add Staff Button -->
+                        <div id="addStaffBtnContainer" class="hidden mb-6">
+                            <button onclick="openAddStaffModal()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
+                                ➕ Add Staff Member
+                            </button>
+                            <p class="text-sm text-gray-500 mt-2">Maximum 15 staff members can be added</p>
+                        </div>
+
+                        <!-- Empty State - Shows when no staff added -->
+                        <div id="emptyStaffState" class="text-center py-16">
+                            <div class="text-6xl mb-4">👥</div>
+                            <h3 class="text-2xl font-bold text-gray-400 mb-2">No Staff Members Added Yet</h3>
+                            <p class="text-gray-500">Staff photos and information will appear here</p>
+                        </div>
+
+                        <!-- Staff Grid -->
+                        <div id="staffGrid" class="hidden grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+                            <!-- Staff cards will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-4xl">🏫</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4">VIVEKANANDHA SCHOOL - CBSE</h3>
+                    <p id="address" class="text-gray-300 text-sm mb-4 editable">Gopalankottai Road,<br>Kysnthullipalayam,<br>Puducherry - 605 009</p>
+                    <p id="email" class="text-gray-300 text-sm mb-2 editable"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="55033c23303e343b34313d343639342626153238343c397b363a38">[email&#160;protected]</a></p>
+                    <p id="phone" class="text-gray-300 text-sm editable">+91 0413 2295657 , +91 9944938761</p>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p id="copyright" class="editable">Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by HIGHMON MEDIAS</p>
+            </div>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        const ADMIN_PASSWORD = 'admin123';
+        let isAdmin = false;
+        let currentPDFUrl = null;
+        let staffMembers = [];
+        const MAX_STAFF = 15;
+
+        // Section switching
+        function showSection(sectionName) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            document.querySelectorAll('[id$="Tab"]').forEach(tab => {
+                tab.classList.remove('border-teal-500', 'bg-teal-50');
+                tab.classList.add('border-transparent');
+            });
+
+            document.getElementById(sectionName + 'Section').classList.remove('hidden');
+
+            const activeTab = document.getElementById(sectionName + 'Tab');
+            activeTab.classList.add('border-teal-500', 'bg-teal-50');
+            activeTab.classList.remove('border-transparent');
+        }
+
+        // PDF handling
+        function handlePDFUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    displayPDF(e.target.result);
+                    showMessage('PDF uploaded successfully! ✓', 'success');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                showMessage('Please select a valid PDF file', 'error');
+            }
+        }
+
+        function uploadPDFUrl() {
+            const url = prompt('Enter PDF URL:');
+            if (url && url.trim() !== '') {
+                if (url.toLowerCase().endsWith('.pdf') || url.includes('pdf')) {
+                    displayPDF(url);
+                    showMessage('PDF loaded successfully! ✓', 'success');
+                } else {
+                    showMessage('Please enter a valid PDF URL', 'error');
+                }
+            }
+        }
+
+        function displayPDF(url) {
+            currentPDFUrl = url;
+            updateSchoolInfoVisibility();
+            const viewerUrl = url.includes('#') ? url + '&toolbar=0' : url + '#toolbar=0&navpanes=0&scrollbar=0';
+            document.getElementById('pdfViewer').src = viewerUrl;
+        }
+
+        function removePDF() {
+            if (confirm('Are you sure you want to remove this PDF?')) {
+                currentPDFUrl = null;
+                updateSchoolInfoVisibility();
+                document.getElementById('pdfViewer').src = '';
+                document.getElementById('pdfFileInput').value = '';
+                showMessage('PDF removed successfully', 'success');
+            }
+        }
+
+        // Drag and drop for PDF
+        const uploadAreaContainer = document.getElementById('pdfUploadArea');
+        if (uploadAreaContainer) {
+            uploadAreaContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadAreaContainer.querySelector('.border-dashed').classList.add('border-blue-500', 'bg-blue-50');
+            });
+
+            uploadAreaContainer.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadAreaContainer.querySelector('.border-dashed').classList.remove('border-blue-500', 'bg-blue-50');
+            });
+
+            uploadAreaContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadAreaContainer.querySelector('.border-dashed').classList.remove('border-blue-500', 'bg-blue-50');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'application/pdf') {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        displayPDF(e.target.result);
+                        showMessage('PDF uploaded successfully! ✓', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    showMessage('Please drop a valid PDF file', 'error');
+                }
+            });
+        }
+
+        // Update School Information section visibility
+        function updateSchoolInfoVisibility() {
+            const publicView = document.getElementById('publicNoDataView');
+            const uploadArea = document.getElementById('pdfUploadArea');
+            const viewerContainer = document.getElementById('pdfViewerContainer');
+            const removePDFBtn = document.getElementById('removePDFBtn');
+
+            if (currentPDFUrl) {
+                publicView.classList.add('hidden');
+                uploadArea.classList.add('hidden');
+                viewerContainer.classList.remove('hidden');
+                
+                if (isAdmin) {
+                    removePDFBtn.classList.remove('hidden');
+                } else {
+                    removePDFBtn.classList.add('hidden');
+                }
+            } else {
+                viewerContainer.classList.add('hidden');
+                
+                if (isAdmin) {
+                    publicView.classList.add('hidden');
+                    uploadArea.classList.remove('hidden');
+                } else {
+                    publicView.classList.remove('hidden');
+                    uploadArea.classList.add('hidden');
+                }
+            }
+        }
+
+        // Secret keyword trigger - type "School" anywhere on the page
+        let keyBuffer = '';
+        const SECRET_KEYWORD = 'School';
+        document.addEventListener('keypress', (e) => {
+            if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            keyBuffer += e.key;
+            if (keyBuffer.length > SECRET_KEYWORD.length) {
+                keyBuffer = keyBuffer.slice(-SECRET_KEYWORD.length);
+            }
+            if (keyBuffer === SECRET_KEYWORD) {
+                keyBuffer = '';
+                document.getElementById('loginModal').classList.remove('hidden');
+                document.getElementById('passwordInput').focus();
+            }
+        });
+
+        // Modal controls (adminBtn is hidden, kept for internal use)
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMsg').classList.add('hidden');
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('adminBtn').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                enableEditMode();
+                document.getElementById('passwordInput').value = '';
+                showMessage('Welcome Admin! You can now edit content.', 'success');
+            } else {
+                document.getElementById('errorMsg').textContent = 'Incorrect password! Try again.';
+                document.getElementById('errorMsg').classList.remove('hidden');
+                document.getElementById('passwordInput').value = '';
+            }
+        });
+
+        // Save button
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            saveAllChanges();
+            showMessage('All changes saved successfully! ✓', 'success');
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Do you want to save changes before logging out?')) {
+                saveAllChanges();
+                showMessage('Changes saved! Logging out...', 'success');
+                setTimeout(() => {
+                    logout();
+                }, 1500);
+            } else {
+                logout();
+            }
+        });
+
+        function logout() {
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminBtn').classList.remove('hidden');
+            disableEditMode();
+            showMessage('Logged out successfully', 'info');
+        }
+
+        // Enable edit mode
+        function enableEditMode() {
+            document.body.classList.add('admin-mode');
+            
+            document.querySelectorAll('.editable').forEach(element => {
+                element.classList.add('editable-hover');
+                element.addEventListener('click', handleEditClick);
+            });
+
+            updateSchoolInfoVisibility();
+            updateStaffSection();
+        }
+
+        // Disable edit mode
+        function disableEditMode() {
+            document.body.classList.remove('admin-mode');
+            
+            document.querySelectorAll('.editable').forEach(element => {
+                element.classList.remove('editable-hover');
+                element.removeEventListener('click', handleEditClick);
+            });
+
+            updateSchoolInfoVisibility();
+            updateStaffSection();
+        }
+
+        // Handle edit click
+        function handleEditClick(e) {
+            if (!isAdmin) return;
+            e.stopPropagation();
+            editText(this);
+        }
+
+        // Edit text function
+        function editText(element) {
+            if (!isAdmin) return;
+            
+            const currentHTML = element.innerHTML;
+            const currentText = element.textContent;
+            const isMultiline = currentHTML.includes('<br>') || element.id.includes('Text') || element.id.includes('Para') || element.id === 'address';
+            
+            if (isMultiline) {
+                const textarea = document.createElement('textarea');
+                textarea.value = currentHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+                textarea.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none';
+                textarea.rows = 4;
+                
+                element.replaceWith(textarea);
+                textarea.focus();
+                
+                const saveChanges = () => {
+                    element.innerHTML = textarea.value.replace(/\n/g, '<br>');
+                    textarea.replaceWith(element);
+                    element.addEventListener('click', handleEditClick);
+                };
+                
+                textarea.addEventListener('blur', saveChanges);
+                
+                textarea.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        element.innerHTML = currentHTML;
+                        textarea.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    }
+                });
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentText;
+                input.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none';
+                
+                element.replaceWith(input);
+                input.focus();
+                input.select();
+                
+                const saveChanges = () => {
+                    element.textContent = input.value;
+                    input.replaceWith(element);
+                    element.addEventListener('click', handleEditClick);
+                };
+                
+                input.addEventListener('blur', saveChanges);
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        saveChanges();
+                    } else if (e.key === 'Escape') {
+                        element.textContent = currentText;
+                        input.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    }
+                });
+            }
+        }
+
+        // Edit image function
+        function editImage(elementId) {
+            if (!isAdmin) return;
+            
+            const imgElement = document.getElementById(elementId);
+            const width = imgElement.naturalWidth || imgElement.width;
+            const height = imgElement.naturalHeight || imgElement.height;
+            
+            const message = `Current image dimensions: ${width} x ${height} pixels\n\nEnter new image URL:`;
+            
+            const newUrl = prompt(message);
+            if (newUrl && newUrl.trim() !== '') {
+                showMessage('Loading new image...', 'info');
+                
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    imgElement.src = newUrl;
+                    showMessage(`Image updated successfully!`, 'success');
+                };
+                tempImg.onerror = function() {
+                    showMessage('Error: Could not load image. Please check the URL.', 'error');
+                };
+                tempImg.src = newUrl;
+            }
+        }
+
+        // Show message
+        function showMessage(text, type = 'success') {
+            const msg = document.createElement('div');
+            msg.textContent = text;
+            let bgColor = 'bg-green-500';
+            if (type === 'error') bgColor = 'bg-red-500';
+            if (type === 'info') bgColor = 'bg-blue-500';
+            msg.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+
+        // ============ STAFF MANAGEMENT FUNCTIONS ============
+
+        // Open add staff modal
+        function openAddStaffModal() {
+            if (staffMembers.length >= MAX_STAFF) {
+                showMessage(`Maximum ${MAX_STAFF} staff members allowed`, 'error');
+                return;
+            }
+            document.getElementById('addStaffModal').classList.remove('hidden');
+        }
+
+        // Close add staff modal
+        function closeAddStaffModal() {
+            document.getElementById('addStaffModal').classList.add('hidden');
+            document.getElementById('addStaffForm').reset();
+            clearPhoto();
+        }
+
+        // Handle photo selection and conversion
+        function handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage('Image size should be less than 5MB', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('Please upload a valid image file (JPEG, PNG, GIF, WEBP)', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoDataUrl = e.target.result;
+                document.getElementById('photoPreview').src = photoDataUrl;
+                document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                document.getElementById('photoUploadArea').classList.add('hidden');
+            };
+            reader.onerror = function() {
+                showMessage('Error reading image file', 'error');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Clear photo
+        function clearPhoto() {
+            document.getElementById('staffPhotoInput').value = '';
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('photoPreviewContainer').classList.add('hidden');
+            document.getElementById('photoUploadArea').classList.remove('hidden');
+        }
+
+        // Handle add staff form submission
+        function handleAddStaff(event) {
+            event.preventDefault();
+
+            if (staffMembers.length >= MAX_STAFF) {
+                showMessage(`Maximum ${MAX_STAFF} staff members allowed`, 'error');
+                return;
+            }
+
+            const photoDataUrl = document.getElementById('photoPreview').src;
+            const name = document.getElementById('staffName').value.trim();
+            const designation = document.getElementById('staffDesignation').value.trim();
+            const subject = document.getElementById('staffSubject').value.trim();
+
+            if (!photoDataUrl) {
+                showMessage('Please upload a photo', 'error');
+                return;
+            }
+
+            const staffMember = {
+                id: Date.now(),
+                photo: photoDataUrl,
+                name: name,
+                designation: designation,
+                subject: subject
+            };
+
+            staffMembers.push(staffMember);
+            renderStaffGrid();
+            closeAddStaffModal();
+            showMessage('Staff member added successfully!', 'success');
+            
+            // Auto-save
+            saveAllChanges();
+        }
+
+        // Render staff grid
+        function renderStaffGrid() {
+            const emptyState = document.getElementById('emptyStaffState');
+            const staffGrid = document.getElementById('staffGrid');
+            const addStaffBtn = document.getElementById('addStaffBtnContainer');
+
+            if (staffMembers.length === 0) {
+                emptyState.classList.remove('hidden');
+                staffGrid.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                staffGrid.classList.remove('hidden');
+                
+                staffGrid.innerHTML = staffMembers.map(staff => `
+                    <div class="staff-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                        <div class="relative">
+                            <img src="${staff.photo}" alt="${staff.name}" class="w-full h-48 object-cover">
+                            ${isAdmin ? `
+                                <button onclick="deleteStaff(${staff.id})" class="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition-colors">
+                                    ×
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div class="p-4 text-center">
+                            <h4 class="font-bold text-gray-800 mb-1 text-sm">${staff.name}</h4>
+                            <p class="text-xs text-blue-600 font-semibold mb-1">${staff.designation}</p>
+                            ${staff.subject ? `<p class="text-xs text-gray-500">${staff.subject}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Show/hide add button based on admin status and staff count
+            if (isAdmin && staffMembers.length < MAX_STAFF) {
+                addStaffBtn.classList.remove('hidden');
+            } else {
+                addStaffBtn.classList.add('hidden');
+            }
+        }
+
+        // Delete staff member
+        function deleteStaff(id) {
+            if (!isAdmin) return;
+            
+            if (confirm('Are you sure you want to remove this staff member?')) {
+                staffMembers = staffMembers.filter(staff => staff.id !== id);
+                renderStaffGrid();
+                showMessage('Staff member removed successfully', 'success');
+                saveAllChanges();
+            }
+        }
+
+        // Update staff visibility based on admin status
+        function updateStaffSection() {
+            renderStaffGrid();
+        }
+
+        // Save all changes
+        function saveAllChanges() {
+            const data = {
+                // About Us - Mission & Vision
+                missionImage: document.getElementById('missionImage').src,
+                missionVisionTitle: document.getElementById('missionVisionTitle').innerHTML,
+                missionHeading: document.getElementById('missionHeading').innerHTML,
+                missionText: document.getElementById('missionText').innerHTML,
+                visionHeading: document.getElementById('visionHeading').innerHTML,
+                visionText: document.getElementById('visionText').innerHTML,
+                curriculumHeading: document.getElementById('curriculumHeading').innerHTML,
+                curriculumText: document.getElementById('curriculumText').innerHTML,
+                standardHeading: document.getElementById('standardHeading').innerHTML,
+                standardText1: document.getElementById('standardText1').innerHTML,
+                standardText2: document.getElementById('standardText2').innerHTML,
+                standardText3: document.getElementById('standardText3').innerHTML,
+                
+                // Infrastructure
+                campusTitle: document.getElementById('campusTitle').innerHTML,
+                campusText: document.getElementById('campusText').innerHTML,
+                campusImage: document.getElementById('campusImage').src,
+                campusLabel: document.getElementById('campusLabel').innerHTML,
+                smartRoomImage: document.getElementById('smartRoomImage').src,
+                smartRoomLabel: document.getElementById('smartRoomLabel').innerHTML,
+                smartRoomTitle: document.getElementById('smartRoomTitle').innerHTML,
+                smartRoomText: document.getElementById('smartRoomText').innerHTML,
+                labImage: document.getElementById('labImage').src,
+                labLabel: document.getElementById('labLabel').innerHTML,
+                labTitle: document.getElementById('labTitle').innerHTML,
+                labText: document.getElementById('labText').innerHTML,
+                libraryTitle: document.getElementById('libraryTitle').innerHTML,
+                libraryText1: document.getElementById('libraryText1').innerHTML,
+                libraryText2: document.getElementById('libraryText2').innerHTML,
+                libraryImage1: document.getElementById('libraryImage1').src,
+                libraryImage2: document.getElementById('libraryImage2').src,
+                libraryImage3: document.getElementById('libraryImage3').src,
+                libraryImage4: document.getElementById('libraryImage4').src,
+                extraCurricularTitle: document.getElementById('extraCurricularTitle').innerHTML,
+                extraCurricularText1: document.getElementById('extraCurricularText1').innerHTML,
+                extraCurricularText2: document.getElementById('extraCurricularText2').innerHTML,
+                activityImage1: document.getElementById('activityImage1').src,
+                activityImage2: document.getElementById('activityImage2').src,
+                activityImage3: document.getElementById('activityImage3').src,
+                activityLabel3: document.getElementById('activityLabel3').innerHTML,
+                activityImage4: document.getElementById('activityImage4').src,
+                artsImage: document.getElementById('artsImage').src,
+                artsLabel: document.getElementById('artsLabel').innerHTML,
+                
+                // Footer
+                address: document.getElementById('address').innerHTML,
+                email: document.getElementById('email').innerHTML,
+                phone: document.getElementById('phone').innerHTML,
+                copyright: document.getElementById('copyright').innerHTML,
+                
+                // PDF
+                pdfUrl: currentPDFUrl,
+                
+                // Staff Members
+                staffMembers: staffMembers
+            };
+            
+            localStorage.setItem('aboutPageData', JSON.stringify(data));
+        }
+
+        // Load saved changes
+        function loadSavedChanges() {
+            const savedData = localStorage.getItem('aboutPageData');
+            if (!savedData) {
+                updateSchoolInfoVisibility();
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(savedData);
+                
+                // Load About Us content
+                if (data.missionImage) document.getElementById('missionImage').src = data.missionImage;
+                if (data.missionVisionTitle) document.getElementById('missionVisionTitle').innerHTML = data.missionVisionTitle;
+                if (data.missionHeading) document.getElementById('missionHeading').innerHTML = data.missionHeading;
+                if (data.missionText) document.getElementById('missionText').innerHTML = data.missionText;
+                if (data.visionHeading) document.getElementById('visionHeading').innerHTML = data.visionHeading;
+                if (data.visionText) document.getElementById('visionText').innerHTML = data.visionText;
+                if (data.curriculumHeading) document.getElementById('curriculumHeading').innerHTML = data.curriculumHeading;
+                if (data.curriculumText) document.getElementById('curriculumText').innerHTML = data.curriculumText;
+                if (data.standardHeading) document.getElementById('standardHeading').innerHTML = data.standardHeading;
+                if (data.standardText1) document.getElementById('standardText1').innerHTML = data.standardText1;
+                if (data.standardText2) document.getElementById('standardText2').innerHTML = data.standardText2;
+                if (data.standardText3) document.getElementById('standardText3').innerHTML = data.standardText3;
+                
+                // Load history content
+                if (data.historyImage) document.getElementById('historyImage').src = data.historyImage;
+                if (data.historyTitle) document.getElementById('historyTitle').innerHTML = data.historyTitle;
+                if (data.historyPara1) document.getElementById('historyPara1').innerHTML = data.historyPara1;
+                if (data.historyPara2) document.getElementById('historyPara2').innerHTML = data.historyPara2;
+                if (data.historyPara3) document.getElementById('historyPara3').innerHTML = data.historyPara3;
+                if (data.historyPara4) document.getElementById('historyPara4').innerHTML = data.historyPara4;
+                if (data.historyPara5) document.getElementById('historyPara5').innerHTML = data.historyPara5;
+                
+                // Load infrastructure content
+                if (data.campusTitle) document.getElementById('campusTitle').innerHTML = data.campusTitle;
+                if (data.campusText) document.getElementById('campusText').innerHTML = data.campusText;
+                if (data.campusImage) document.getElementById('campusImage').src = data.campusImage;
+                if (data.campusLabel) document.getElementById('campusLabel').innerHTML = data.campusLabel;
+                if (data.smartRoomImage) document.getElementById('smartRoomImage').src = data.smartRoomImage;
+                if (data.smartRoomLabel) document.getElementById('smartRoomLabel').innerHTML = data.smartRoomLabel;
+                if (data.smartRoomTitle) document.getElementById('smartRoomTitle').innerHTML = data.smartRoomTitle;
+                if (data.smartRoomText) document.getElementById('smartRoomText').innerHTML = data.smartRoomText;
+                if (data.labImage) document.getElementById('labImage').src = data.labImage;
+                if (data.labLabel) document.getElementById('labLabel').innerHTML = data.labLabel;
+                if (data.labTitle) document.getElementById('labTitle').innerHTML = data.labTitle;
+                if (data.labText) document.getElementById('labText').innerHTML = data.labText;
+                if (data.libraryTitle) document.getElementById('libraryTitle').innerHTML = data.libraryTitle;
+                if (data.libraryText1) document.getElementById('libraryText1').innerHTML = data.libraryText1;
+                if (data.libraryText2) document.getElementById('libraryText2').innerHTML = data.libraryText2;
+                if (data.libraryImage1) document.getElementById('libraryImage1').src = data.libraryImage1;
+                if (data.libraryImage2) document.getElementById('libraryImage2').src = data.libraryImage2;
+                if (data.libraryImage3) document.getElementById('libraryImage3').src = data.libraryImage3;
+                if (data.libraryImage4) document.getElementById('libraryImage4').src = data.libraryImage4;
+                if (data.extraCurricularTitle) document.getElementById('extraCurricularTitle').innerHTML = data.extraCurricularTitle;
+                if (data.extraCurricularText1) document.getElementById('extraCurricularText1').innerHTML = data.extraCurricularText1;
+                if (data.extraCurricularText2) document.getElementById('extraCurricularText2').innerHTML = data.extraCurricularText2;
+                if (data.activityImage1) document.getElementById('activityImage1').src = data.activityImage1;
+                if (data.activityImage2) document.getElementById('activityImage2').src = data.activityImage2;
+                if (data.activityImage3) document.getElementById('activityImage3').src = data.activityImage3;
+                if (data.activityLabel3) document.getElementById('activityLabel3').innerHTML = data.activityLabel3;
+                if (data.activityImage4) document.getElementById('activityImage4').src = data.activityImage4;
+                if (data.artsImage) document.getElementById('artsImage').src = data.artsImage;
+                if (data.artsLabel) document.getElementById('artsLabel').innerHTML = data.artsLabel;
+                
+                // Load footer
+                if (data.address) document.getElementById('address').innerHTML = data.address;
+                if (data.email) document.getElementById('email').innerHTML = data.email;
+                if (data.phone) document.getElementById('phone').innerHTML = data.phone;
+                if (data.copyright) document.getElementById('copyright').innerHTML = data.copyright;
+                
+                // Load PDF if exists
+                if (data.pdfUrl) {
+                    currentPDFUrl = data.pdfUrl;
+                    const viewerUrl = data.pdfUrl.includes('#') ? data.pdfUrl + '&toolbar=0' : data.pdfUrl + '#toolbar=0&navpanes=0&scrollbar=0';
+                    document.getElementById('pdfViewer').src = viewerUrl;
+                }
+                
+                // Load Staff Members
+                if (data.staffMembers && Array.isArray(data.staffMembers)) {
+                    staffMembers = data.staffMembers;
+                    renderStaffGrid();
+                }
+                
+            } catch (error) {
+                console.error('Error loading saved data:', error);
+            }
+        }
+
+        // Load saved changes on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedChanges();
+        });
+
+    </script>
+</body>
+</html>
