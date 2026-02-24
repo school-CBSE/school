@@ -205,15 +205,15 @@
             <!-- Sidebar -->
             <div class="lg:w-64">
                 <div class="bg-white rounded-lg shadow-md overflow-hidden sticky top-4">
-                    <div class="bg-teal-500 text-white px-6 py-4">
-                        <h3 class="font-bold text-lg">About us</h3>
+                    <div class="bg-blue-700 text-white px-6 py-4">
+                        <h3 id="sidebarHeading" class="font-bold text-lg">About us</h3>
                     </div>
                     <ul class="py-2">
-                        <li id="aboutUsTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-teal-500 bg-teal-50" onclick="showSection('aboutUs')">About us</li>
-                        <li id="schoolInfoTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('schoolInfo')">School Information</li>
-                        <li id="historyTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('history')">History</li>
-                        <li id="infrastructureTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('infrastructure')">Infrastructure</li>
-                        <li id="staffTab" class="px-6 py-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-l-4 border-transparent hover:border-teal-500" onclick="showSection('staff')">Staff Members</li>
+                        <li id="aboutUsTab" class="px-6 py-3 text-gray-700 hover:bg-blue-50 cursor-pointer border-l-4 border-blue-600 bg-blue-50" onclick="showSection('aboutUs')">About us</li>
+                        <li id="schoolInfoTab" class="px-6 py-3 text-gray-700 hover:bg-blue-50 cursor-pointer border-l-4 border-transparent hover:border-blue-600" onclick="showSection('schoolInfo')">School Information</li>
+                        <li id="historyTab" class="px-6 py-3 text-gray-700 hover:bg-blue-50 cursor-pointer border-l-4 border-transparent hover:border-blue-600" onclick="showSection('history')">History</li>
+                        <li id="infrastructureTab" class="px-6 py-3 text-gray-700 hover:bg-blue-50 cursor-pointer border-l-4 border-transparent hover:border-blue-600" onclick="showSection('infrastructure')">Infrastructure</li>
+                        <li id="staffTab" class="px-6 py-3 text-gray-700 hover:bg-blue-50 cursor-pointer border-l-4 border-transparent hover:border-blue-600" onclick="showSection('staff')">Staff Members</li>
                     </ul>
                 </div>
             </div>
@@ -535,21 +535,32 @@
         const MAX_STAFF = 15;
 
         // Section switching
+        const sectionTitles = {
+            aboutUs: 'About us',
+            schoolInfo: 'School Information',
+            history: 'History',
+            infrastructure: 'Infrastructure',
+            staff: 'Staff Members'
+        };
+
         function showSection(sectionName) {
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.add('hidden');
             });
 
             document.querySelectorAll('[id$="Tab"]').forEach(tab => {
-                tab.classList.remove('border-teal-500', 'bg-teal-50');
+                tab.classList.remove('border-blue-600', 'bg-blue-50');
                 tab.classList.add('border-transparent');
             });
 
             document.getElementById(sectionName + 'Section').classList.remove('hidden');
 
             const activeTab = document.getElementById(sectionName + 'Tab');
-            activeTab.classList.add('border-teal-500', 'bg-teal-50');
+            activeTab.classList.add('border-blue-600', 'bg-blue-50');
             activeTab.classList.remove('border-transparent');
+
+            // Update sidebar heading to match active section
+            document.getElementById('sidebarHeading').textContent = sectionTitles[sectionName];
         }
 
         // PDF handling
