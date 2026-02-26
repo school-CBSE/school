@@ -109,6 +109,7 @@
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='about-us.html'">ABOUT US</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='facilities.html'">FACILITIES</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='galleries.html'">GALLERIES</li>
+                    <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='career.html'">CAREER</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='admission.html'">ADMISSION</li>
                     <li class="py-3 bg-blue-800 px-3 cursor-pointer transition-colors">CONTACT US</li>
                 </ul>
@@ -118,6 +119,7 @@
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='about-us.html'">ABOUT US</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='facilities.html'">FACILITIES</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='galleries.html'">GALLERIES</li>
+                    <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='career.html'">CAREER</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='admission.html'">ADMISSION</li>
                     <li class="py-3 bg-blue-800 px-3 cursor-pointer transition-colors">CONTACT US</li>
                 </ul>
@@ -323,7 +325,7 @@
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p id="copyright" class="editable">Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span></p>
+                <p class="text-gray-400 text-sm">Copyright &copy;2026 KUYILAPPALAYAM SCHOOL | Developed by @&#x1F182;&#x1F181;&#x1F178;&#x1F181;&#x1F170;&#x1F181;</p>
             </div>
         </div>
     </footer>
@@ -541,12 +543,10 @@
                         var addr = document.getElementById('footerAddress') || document.getElementById('address');
                         var email = document.getElementById('footerEmail') || document.getElementById('email');
                         var phone = document.getElementById('footerPhone') || document.getElementById('phone');
-                        var copy = document.getElementById('footerCopyright') || document.getElementById('copyright');
+
                         if (addr && fd.address) addr.innerHTML = fd.address;
                         if (email && fd.email) email.innerHTML = fd.email;
                         if (phone && fd.phone) phone.innerHTML = fd.phone;
-                        // Always apply colored copyright - from shared data or hardcoded fallback
-                        if (copy) copy.innerHTML = (fd.copyright && fd.copyright.indexOf('span') !== -1) ? fd.copyright : 'Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span>';
                     }
                 } catch(e) {}
             })();

@@ -88,6 +88,7 @@
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='about-us.html'">ABOUT US</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='facilities.html'">FACILITIES</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='galleries.html'">GALLERIES</li>
+                    <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='career.html'">CAREER</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='admission.html'">ADMISSION</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='contact-us.html'">CONTACT US</li>
                 </ul>
@@ -97,6 +98,7 @@
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='about-us.html'">ABOUT US</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='facilities.html'">FACILITIES</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='galleries.html'">GALLERIES</li>
+                    <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='career.html'">CAREER</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='admission.html'">ADMISSION</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='contact-us.html'">CONTACT US</li>
                 </ul>
@@ -223,7 +225,7 @@
             </div>
             
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-               <p id="copyright" class="editable">Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span></p>
+               <p class="text-gray-400 text-sm">Copyright &copy;2026 KUYILAPPALAYAM SCHOOL | Developed by @&#x1F182;&#x1F181;&#x1F178;&#x1F181;&#x1F170;&#x1F181;</p>
             </div>
         </div>
     </footer>
@@ -544,7 +546,6 @@
                 address: document.getElementById('address').innerHTML,
                 email: document.getElementById('email').innerHTML,
                 phone: document.getElementById('phone').innerHTML,
-                copyright: (function(){ var c = document.getElementById('copyright'); return (c && c.innerHTML.indexOf('span') !== -1) ? c.innerHTML : 'Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span>'; })()
             };
             
             localStorage.setItem('schoolWebsiteData', JSON.stringify(data));
@@ -558,7 +559,6 @@
                 address: data.address,
                 email: data.email,
                 phone: data.phone,
-                copyright: data.copyright
             }));
         }
 
@@ -618,11 +618,8 @@
                 if (data.address) document.getElementById('address').innerHTML = data.address;
                 if (data.email) document.getElementById('email').innerHTML = data.email;
                 if (data.phone) document.getElementById('phone').innerHTML = data.phone;
-                // Always restore colored copyright
-                var copyrightEl = document.getElementById('copyright');
+                
                 if (copyrightEl) {
-                    var savedCopy = data.copyright;
-                    copyrightEl.innerHTML = (savedCopy && savedCopy.indexOf('span') !== -1) ? savedCopy : 'Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span>';
                 }
                 
             } catch (error) {

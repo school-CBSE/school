@@ -3,181 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher's Career - Vivekanandha School CBSE</title>
+    <title>Admission Form - Vivekanandha School - CBSE</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>emailjs.init("-_D9tc9u8jE8heMjo");</script>
     <style>
-        body { background-color: #f8fafc; font-family: sans-serif; }
         .editable-hover:hover {
-            outline: 2px dashed #3b82f6;
+            background-color: #eff6ff;
             cursor: pointer;
-            border-radius: 4px;
+            outline: 2px dashed #3b82f6;
         }
         .edit-icon { display: none; }
         .admin-mode .edit-icon { display: block; }
-
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #1e3a5f;
-            margin-bottom: 0.35rem;
-            letter-spacing: 0.02em;
-        }
-        .required { color: #dc2626; margin-left: 2px; }
-
+        .image-container { position: relative; }
+        .form-label { font-weight: 600; color: #374151; margin-bottom: 4px; display: block; font-size: 0.9rem; }
         .form-input {
-            width: 100%;
-            padding: 0.65rem 1rem;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 0.5rem;
-            font-size: 0.95rem;
-            background: #fff;
-            color: #1e293b;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 8px;
+            font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; background: #f9fafb;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+        .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); background: #fff; }
+        select.form-input { cursor: pointer; }
+        .section-title {
+            font-size: 1rem; font-weight: 700; color: #1e40af;
+            border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 16px; margin-top: 24px;
         }
-
-        .file-upload-area {
-            border: 2px dashed #93c5fd;
-            border-radius: 0.75rem;
-            padding: 2rem 1rem;
-            text-align: center;
-            background: #eff6ff;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .file-upload-area:hover { border-color: #2563eb; background: #dbeafe; }
-        .file-upload-area input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-        }
-
-        .hero-bg {
-            background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 65%, #3b82f6 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        .hero-bg::before {
-            content:''; position:absolute;
-            width:400px; height:400px; border-radius:50%;
-            background:rgba(255,255,255,0.05);
-            top:-120px; right:-80px;
-        }
-        .hero-bg::after {
-            content:''; position:absolute;
-            width:280px; height:280px; border-radius:50%;
-            background:rgba(255,255,255,0.04);
-            bottom:-90px; left:-50px;
-        }
-
-        .section-card {
-            background: #fff;
-            border-radius: 1rem;
-            padding: 1.75rem 2rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .section-heading {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #2563eb;
-            border-left: 3px solid #2563eb;
-            padding-left: 0.65rem;
-            margin-bottom: 1.4rem;
-        }
-
         .submit-btn {
-            background: linear-gradient(135deg, #1e3a5f, #2563eb);
-            color: #fff;
-            border: none;
-            padding: 0.85rem 3rem;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            transition: all 0.25s;
-            box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            color: white; font-size: 1.1rem; font-weight: 700;
+            padding: 14px 48px; border-radius: 10px; border: none;
+            cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(59,130,246,0.4);
         }
-        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(37,99,235,0.45); }
-        .submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-
-        #successOverlay {
-            display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,0.55);
-            z-index:999;
-            align-items:center;
-            justify-content:center;
-        }
-        #successOverlay.active { display:flex; }
-
-        .check-circle {
-            width:70px; height:70px;
-            border-radius:50%;
-            background:#16a34a;
-            display:flex; align-items:center; justify-content:center;
-            margin:0 auto 1rem;
-            animation: pop 0.4s cubic-bezier(.175,.885,.32,1.275);
-        }
-        @keyframes pop {
-            from{transform:scale(0);opacity:0;}
-            to{transform:scale(1);opacity:1;}
-        }
-
-        .custom-checkbox {
-            width:18px; height:18px;
-            border:2px solid #2563eb;
-            border-radius:4px;
-            flex-shrink:0;
-            cursor:pointer;
-            -webkit-appearance:none;
-            appearance:none;
-            background:#fff;
-            transition:all 0.15s;
-        }
-        .custom-checkbox:checked {
-            background:#2563eb;
-            border-color:#2563eb;
-            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143z'/%3E%3C/svg%3E");
-            background-size:14px;
-            background-repeat:no-repeat;
-            background-position:center;
-        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.5); }
+        #successMsg { display:none; background:#d1fae5; border:1.5px solid #34d399; color:#065f46; padding:16px 24px; border-radius:10px; font-weight:600; text-align:center; margin-top:20px; }
+        #loadingMsg { display:none; background:#dbeafe; border:1.5px solid #60a5fa; color:#1e40af; padding:16px 24px; border-radius:10px; font-weight:600; text-align:center; margin-top:20px; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
 
-    <!-- ═══════════════════ HEADER ═══════════════════ -->
+    <!-- Admin Panel -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        <button id="adminBtn" class="hidden"></button>
+        <div id="adminPanel" class="hidden flex gap-2">
+            <button id="saveBtn" class="px-5 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold shadow-2xl transition-all flex items-center gap-2 border-2 border-green-300 text-sm">
+                &#128190; Save Changes
+            </button>
+            <button id="logoutBtn" class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold shadow-2xl transition-all flex items-center gap-2 border-2 border-blue-300 text-sm">
+                &#128682; Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                <input type="password" id="passwordInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Enter admin password">
+                <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden">Incorrect password! Try again.</p>
+                <p class="text-gray-500 text-xs mt-2">Demo password: admin123</p>
+            </div>
+            <button id="loginBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors">Login</button>
+        </div>
+    </div>
+
+    <!-- Header -->
     <header class="bg-blue-600 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3 flex items-center gap-3">
             <div class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden">
-                <img src="School_logo.jpg" alt="School Logo" class="w-full h-full object-contain">
+                <img src="School_logo.jpg" alt="School Logo" class="w-full h-full object-contain" onerror="this.style.display='none'">
             </div>
             <div class="flex-1 min-w-0">
-                <h1 id="schoolName" class="text-lg md:text-2xl font-bold leading-tight editable">VIVEKANANDHA SCHOOL - CBSE</h1>
-                <p id="affiliation" class="text-xs md:text-sm opacity-90 leading-snug mt-0.5 editable">Affiliated to Central Board of Secondary Education - New Delhi | Affiliation No.930011</p>
+                <h1 id="schoolName" class="text-lg md:text-2xl font-bold editable leading-tight">VIVEKANANDHA SCHOOL - CBSE</h1>
+                <p id="affiliation" class="text-xs md:text-sm opacity-90 editable leading-snug mt-0.5">Affiliated to Central Board of Secondary Education - New Delhi | Affiliation No.930011</p>
             </div>
-            <button id="menuToggle" class="md:hidden flex-shrink-0 ml-2 p-2 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none" onclick="toggleMenu()" aria-label="Toggle menu">
-                <div class="flex flex-col gap-1.5">
-                    <span class="block w-6 h-0.5 bg-white"></span>
-                    <span class="block w-6 h-0.5 bg-white"></span>
-                    <span class="block w-6 h-0.5 bg-white"></span>
+            <button class="md:hidden flex-shrink-0 ml-2 p-2 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none" onclick="toggleMenu()" aria-label="Toggle menu">
+                <div id="hamburgerIcon" class="flex flex-col gap-1.5">
+                    <span class="block w-6 h-0.5 bg-white transition-all duration-300"></span>
+                    <span class="block w-6 h-0.5 bg-white transition-all duration-300"></span>
+                    <span class="block w-6 h-0.5 bg-white transition-all duration-300"></span>
                 </div>
             </button>
         </div>
@@ -188,7 +95,8 @@
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='about-us.html'">ABOUT US</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='facilities.html'">FACILITIES</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='galleries.html'">GALLERIES</li>
-                    <li class="py-3 bg-blue-900 px-3 cursor-pointer">ADMISSION</li>
+                    <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='career.html'">CAREER</li>
+                    <li class="py-3 bg-blue-900 px-3 cursor-pointer transition-colors border-b-2 border-yellow-400">ADMISSION</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='contact-us.html'">CONTACT US</li>
                 </ul>
                 <ul id="mobileMenu" class="md:hidden hidden flex-col text-sm font-semibold pb-2">
@@ -196,6 +104,7 @@
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='about-us.html'">ABOUT US</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='facilities.html'">FACILITIES</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='galleries.html'">GALLERIES</li>
+                    <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors border-b border-blue-600" onclick="window.location.href='career.html'">CAREER</li>
                     <li class="py-3 bg-blue-900 px-3 cursor-pointer border-b border-blue-600">ADMISSION</li>
                     <li class="py-3 hover:bg-blue-800 px-3 cursor-pointer transition-colors" onclick="window.location.href='contact-us.html'">CONTACT US</li>
                 </ul>
@@ -203,397 +112,208 @@
         </nav>
     </header>
 
-    <!-- ═══════════════════ HERO ═══════════════════ -->
-    <div class="hero-bg text-white py-14 text-center px-4">
-        <div class="relative z-10">
-            <span class="inline-block bg-white bg-opacity-20 text-blue-100 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">
-                Join Our Team
-            </span>
-            <h2 class="text-3xl md:text-5xl font-bold mb-3">Teacher's Career</h2>
-            <p class="text-blue-100 max-w-md mx-auto text-base">We are always looking for passionate educators. Fill in the form and we'll get back to you.</p>
-        </div>
+    <!-- Page Banner -->
+    <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white py-10 text-center">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-wide drop-shadow">Admission Form</h2>
+        <p class="mt-2 text-blue-100 text-sm md:text-base">Fill in the details below to apply for admission</p>
     </div>
 
-    <!-- ═══════════════════ FORM ═══════════════════ -->
-    <div class="container mx-auto px-4 py-10 max-w-2xl">
+    <!-- Admission Form -->
+    <div class="container mx-auto px-4 py-10 max-w-3xl">
+        <div class="bg-white rounded-2xl shadow-lg p-8 md:p-10 border border-blue-100">
 
-        <form id="careerForm" novalidate>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2 text-sm text-blue-800">
+                <strong>Note:</strong> After submitting, the form details will be sent via email. Please fill all fields accurately.
+            </div>
 
-            <!-- Personal Details -->
-            <div class="section-card">
-                <div class="section-heading">Personal Details</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label class="form-label">First Name <span class="required">*</span></label>
-                        <input type="text" id="firstName" name="firstName" class="form-input" placeholder="First name" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Last Name <span class="required">*</span></label>
-                        <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Last name" required>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="form-label">Parent's Name <span class="required">*</span></label>
-                        <input type="text" id="parentName" name="parentName" class="form-input" placeholder="Parent's full name" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Date of Birth <span class="required">*</span></label>
-                        <input type="date" id="dob" name="dob" class="form-input" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Gender <span class="required">*</span></label>
-                        <select id="gender" name="gender" class="form-input" required>
-                            <option value="">Select gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                            <option value="Prefer not to say">Prefer not to say</option>
-                        </select>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="form-label">Address <span class="required">*</span></label>
-                        <textarea id="address" name="address" class="form-input" rows="3" placeholder="Full residential address" required></textarea>
-                    </div>
+            <p class="section-title">Student Details</p>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label">Student Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="f_studentName" class="form-input" placeholder="Enter full name">
+                </div>
+                <div>
+                    <label class="form-label">Caste <span class="text-red-500">*</span></label>
+                    <input type="text" id="f_studentCast" class="form-input" placeholder="Enter caste">
+                </div>
+                <div>
+                    <label class="form-label">Date of Birth <span class="text-red-500">*</span></label>
+                    <input type="date" id="f_dob" class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">Gender <span class="text-red-500">*</span></label>
+                    <select id="f_gender" class="form-input">
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Contact & Qualification -->
-            <div class="section-card">
-                <div class="section-heading">Contact & Qualification</div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label class="form-label">Mobile Number <span class="required">*</span></label>
-                        <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="10-digit mobile number" required maxlength="10">
-                    </div>
-                    <div>
-                        <label class="form-label">Email Address <span class="required">*</span></label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="form-label">Degree / Qualification <span class="required">*</span></label>
-                        <input type="text" id="degree" name="degree" class="form-input" placeholder="e.g. B.Ed, M.Sc Mathematics, MA English" required>
-                    </div>
+            <p class="section-title">Father's Details</p>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label">Father's Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="f_fatherName" class="form-input" placeholder="Enter father's full name">
+                </div>
+                <div>
+                    <label class="form-label">Father's Caste <span class="text-red-500">*</span></label>
+                    <input type="text" id="f_fatherCast" class="form-input" placeholder="Enter caste">
                 </div>
             </div>
 
-            <!-- Resume Upload -->
-            <div class="section-card">
-                <div class="section-heading">Resume / CV</div>
-                <div class="file-upload-area" id="dropArea">
-                    <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" onchange="handleFile(this)">
-                    <div class="pointer-events-none">
-                        <div class="text-4xl mb-2">📎</div>
-                        <p class="text-blue-700 font-semibold text-sm">Click to attach your Resume / CV</p>
-                        <p class="text-gray-500 text-xs mt-1">Accepted: PDF, DOC, DOCX (max 5 MB)</p>
-                    </div>
+            <p class="section-title">Mother's Details</p>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label">Mother's Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="f_motherName" class="form-input" placeholder="Enter mother's full name">
                 </div>
-                <p id="fileNameDisplay" class="text-center text-green-600 font-semibold text-sm mt-2 hidden"></p>
-            </div>
-
-            <!-- Verification -->
-            <div class="section-card">
-                <div class="section-heading">Declaration</div>
-                <label class="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" id="verification" class="custom-checkbox mt-0.5" required>
-                    <span class="text-sm text-gray-700 leading-relaxed">
-                        I hereby declare that all information provided above is true and correct to the best of my knowledge. I understand that any false information may lead to disqualification of my application.
-                    </span>
-                </label>
-            </div>
-
-            <!-- Error -->
-            <p id="formError" class="text-red-600 text-sm font-semibold text-center mb-5 hidden"></p>
-
-            <!-- Submit -->
-            <div class="text-center pb-12">
-                <button type="submit" id="submitBtn" class="submit-btn">
-                    🚀 &nbsp; Submit Application
-                </button>
-                <p class="text-gray-400 text-xs mt-3">We will respond within 3–5 working days</p>
-            </div>
-
-        </form>
-    </div>
-
-    <!-- ═══════════════════ SUCCESS OVERLAY ═══════════════════ -->
-    <div id="successOverlay">
-        <div class="bg-white rounded-2xl p-10 mx-4 max-w-sm w-full text-center shadow-2xl">
-            <div class="check-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Application Sent!</h3>
-            <p class="text-gray-500 text-sm mb-2">Your application has been submitted successfully.</p>
-            <p class="text-gray-500 text-sm mb-6">Our team will review and contact you within <strong>3–5 working days</strong>.</p>
-            <button onclick="closeSuccess()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2.5 rounded-full transition-colors text-sm">
-                Back to Home
-            </button>
-        </div>
-    </div>
-
-    <!-- ═══════════════════ ADMIN PANEL ═══════════════════ -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-        <button id="adminBtn" class="hidden"></button>
-        <div id="adminPanel" class="hidden gap-2" style="display:none;">
-            <button id="saveBtn" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
-                💾 Save Changes
-            </button>
-            <button id="logoutBtn" class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold shadow-lg transition-all flex items-center gap-2">
-                🚪 Logout
-            </button>
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" style="display:none;" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Admin Login</h2>
-                <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-            </div>
-            <form id="loginForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Password</label>
-                    <input type="password" id="passwordInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Enter admin password">
-                    <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
-                    <p class="text-gray-500 text-xs mt-2">Demo password: admin123</p>
+                <div>
+                    <label class="form-label">Mother's Caste <span class="text-red-500">*</span></label>
+                    <input type="text" id="f_motherCast" class="form-input" placeholder="Enter caste">
                 </div>
-                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors">
-                    Login
-                </button>
-            </form>
+            </div>
+
+            <p class="section-title">Contact Details</p>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div class="md:col-span-2">
+                    <label class="form-label">Address <span class="text-red-500">*</span></label>
+                    <textarea id="f_address_input" class="form-input" rows="3" placeholder="Enter full address" style="resize:vertical;"></textarea>
+                </div>
+                <div>
+                    <label class="form-label">Phone Number <span class="text-red-500">*</span></label>
+                    <input type="tel" id="f_phone_input" class="form-input" placeholder="Enter 10-digit phone number" maxlength="10">
+                </div>
+                <div>
+                    <label class="form-label">Parent's Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="f_email_input" class="form-input" placeholder="Enter email address">
+                </div>
+            </div>
+
+            <p class="section-title">Class Details</p>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div>
+                    <label class="form-label">Class You Want <span class="text-red-500">*</span></label>
+                    <select id="f_class" class="form-input">
+                        <option value="">-- Select Class --</option>
+                        <option value="L.K.G">L.K.G</option>
+                        <option value="U.K.G">U.K.G</option>
+                        <option value="Class I">Class I</option>
+                        <option value="Class II">Class II</option>
+                        <option value="Class III">Class III</option>
+                        <option value="Class IV">Class IV</option>
+                        <option value="Class V">Class V</option>
+                        <option value="Class VI">Class VI</option>
+                        <option value="Class VII">Class VII</option>
+                        <option value="Class VIII">Class VIII</option>
+                        <option value="Class IX">Class IX</option>
+                        <option value="Class X">Class X</option>
+                        <option value="Class XI">Class XI</option>
+                        <option value="Class XII">Class XII</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Date of Submission</label>
+                    <input type="text" id="f_date" class="form-input bg-gray-100 text-gray-600 cursor-not-allowed" readonly>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <button class="submit-btn" onclick="submitAdmissionForm()">Submit Application</button>
+            </div>
+            <div id="loadingMsg">Sending your application, please wait...</div>
+            <div id="successMsg">Your admission application has been submitted successfully! We will contact you shortly.</div>
         </div>
     </div>
 
-    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <!-- Footer (identical to other pages) -->
     <footer class="bg-gray-900 text-white py-12 mt-12">
         <div class="container mx-auto px-4">
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="flex items-center gap-4">
                     <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-                        <span class="text-4xl">🏫</span>
+                        <span class="text-4xl">&#127979;</span>
                     </div>
                 </div>
                 <div>
                     <h3 class="text-xl font-bold mb-4">VIVEKANANDHA SCHOOL - CBSE</h3>
-                    <p id="footerAddress" class="text-gray-300 text-sm mb-4 editable">Gopalankadai Road,,<br>Kysnthullipalayam,<br>Puducherry - 605 009</p>
-                    <p id="footerEmail" class="text-gray-300 text-sm mb-2 editable"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5c2a352a39373d323d3238343d2f3f343333303f3e2f391c3b313d3530723f3331">[email&#160;protected]</a></p>
+                    <p id="footerAddress" class="text-gray-300 text-sm mb-4 editable">Gopalankadai Road,<br>Kysnthullipalayam,<br>Puducherry - 605 009</p>
+                    <p id="footerEmail" class="text-gray-300 text-sm mb-2 editable">vivekanandhaschool [at] gmail.com</p>
                     <p id="footerPhone" class="text-gray-300 text-sm editable">+91 0413 2295657 , +91 9944938761</p>
                 </div>
-                <!-- <div>
-                    <h3 class="text-xl font-bold mb-4">Quick Links</h3>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li class="hover:text-white cursor-pointer" onclick="window.location.href='school-website.html'">🏠 Home</li>
-                        <li class="hover:text-white cursor-pointer" onclick="window.location.href='about-us.html'">ℹ️ About Us</li>
-                        <li class="hover:text-white cursor-pointer" onclick="window.location.href='facilities.html'">🏫 Facilities</li>
-                        <li class="hover:text-white cursor-pointer" onclick="window.location.href='galleries.html'">🖼️ Galleries</li>
-                        <li class="hover:text-white cursor-pointer" onclick="window.location.href='contact-us.html'">📞 Contact Us</li>
-                    </ul>
-                </div> -->
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p id="copyright" class="editable">Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span></p>
+                <p class="text-gray-400 text-sm">Copyright &copy;2026 KUYILAPPALAYAM SCHOOL | Developed by @&#x1F182;&#x1F181;&#x1F178;&#x1F181;&#x1F170;&#x1F181;</p>
             </div>
         </div>
     </footer>
 
-    <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Mobile menu
-        function toggleMenu() {
-            document.getElementById('mobileMenu').classList.toggle('hidden');
-        }
+    <script>
+    (function() {
+        var ADMIN_PASSWORD = 'admin123';
+        var isAdmin = false;
 
-        // Show file name after selection
-        function handleFile(input) {
-            const display = document.getElementById('fileNameDisplay');
-            if (input.files && input.files[0]) {
-                display.textContent = '✅  ' + input.files[0].name;
-                display.classList.remove('hidden');
-            }
-        }
+        // Auto-fill today's date
+        document.getElementById('f_date').value = new Date().toLocaleDateString('en-IN', {year:'numeric', month:'long', day:'numeric'});
 
-        // ─── FORM SUBMISSION ───────────────────────────────────────────────
-        // This page uses EmailJS (https://www.emailjs.com) — a FREE service
-        // that sends emails directly from the browser (no server needed).
-        //
-        // SETUP STEPS (5 minutes):
-        //   1. Sign up at https://www.emailjs.com (free plan = 200 emails/mo)
-        //   2. Add an Email Service (Gmail works great)
-        //   3. Create an Email Template. In the template body use:
-        //        {{message}}
-        //      Set "Reply To" to: {{reply_to}}
-        //   4. Go to Account → API Keys and copy your Public Key
-        //   5. Replace the three values below with your actual IDs:
-        //
-        const EMAILJS_PUBLIC_KEY  = 'SOLitf7zyUDhLGlPy';
-        const EMAILJS_SERVICE_ID  = 'service_4l4uc5m';
-        const EMAILJS_TEMPLATE_ID = 'template_akw97qh';
-        //
-        // ──────────────────────────────────────────────────────────────────
-
-        document.getElementById('careerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const errBox  = document.getElementById('formError');
-            const btn     = document.getElementById('submitBtn');
-            errBox.classList.add('hidden');
-
-            // Collect values
-            const firstName  = document.getElementById('firstName').value.trim();
-            const lastName   = document.getElementById('lastName').value.trim();
-            const parentName = document.getElementById('parentName').value.trim();
-            const dob        = document.getElementById('dob').value;
-            const gender     = document.getElementById('gender').value;
-            const address    = document.getElementById('address').value.trim();
-            const mobile     = document.getElementById('mobile').value.trim();
-            const email      = document.getElementById('email').value.trim();
-            const degree     = document.getElementById('degree').value.trim();
-            const resumeFile = document.getElementById('resume').files[0];
-            const verified   = document.getElementById('verification').checked;
-
-            // Validation
-            if (!firstName || !lastName || !parentName || !dob || !gender || !address || !mobile || !email || !degree) {
-                showError('⚠ Please fill in all required fields.'); return;
-            }
-            if (!/^\d{10}$/.test(mobile)) {
-                showError('⚠ Please enter a valid 10-digit mobile number.'); return;
-            }
-            if (!/\S+@\S+\.\S+/.test(email)) {
-                showError('⚠ Please enter a valid email address.'); return;
-            }
-            if (!verified) {
-                showError('⚠ Please check the declaration box before submitting.'); return;
-            }
-
-            btn.disabled = true;
-            btn.textContent = 'Sending…';
-
-            // Build readable email body
-            const emailBody =
-`NEW TEACHER CAREER APPLICATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Name           : ${firstName} ${lastName}
-Parent's Name  : ${parentName}
-Date of Birth  : ${dob}
-Gender         : ${gender}
-Address        : ${address}
-Mobile         : ${mobile}
-Email          : ${email}
-Degree         : ${degree}
-Resume         : ${resumeFile ? resumeFile.name : 'Not attached'}
-Submitted on   : ${new Date().toLocaleString('en-IN')}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
-
-            // Demo mode if keys not configured
-            if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = '🚀 &nbsp; Submit Application';
-                    document.getElementById('successOverlay').classList.add('active');
-                    document.getElementById('careerForm').reset();
-                    document.getElementById('fileNameDisplay').classList.add('hidden');
-                }, 1000);
-                return;
-            }
-
-            // Real email send
-            try {
-                if (!window.emailjs) {
-                    await loadScript('https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js');
-                    emailjs.init(EMAILJS_PUBLIC_KEY);
-                }
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    from_name: `${firstName} ${lastName}`,
-                    reply_to:  email,
-                    message:   emailBody
-                });
-                document.getElementById('successOverlay').classList.add('active');
-                document.getElementById('careerForm').reset();
-                document.getElementById('fileNameDisplay').classList.add('hidden');
-            } catch(err) {
-                console.error(err);
-                showError('⚠ Submission failed. Please try again or email us directly.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '🚀 &nbsp; Submit Application';
-            }
-        });
-
-        function showError(msg) {
-            const el = document.getElementById('formError');
-            el.textContent = msg;
-            el.classList.remove('hidden');
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function loadScript(src) {
-            return new Promise((res, rej) => {
-                const s = document.createElement('script');
-                s.src = src; s.onload = res; s.onerror = rej;
-                document.head.appendChild(s);
-            });
-        }
-
-
-        // ═══════════════════ ADMIN SYSTEM ═══════════════════
-        const ADMIN_PASSWORD = 'admin123';
-        let isAdmin = false;
-
-        // Secret keyword trigger - type "School" anywhere on the page
-        let keyBuffer = '';
-        const SECRET_KEYWORD = 'School';
-        document.addEventListener('keypress', (e) => {
-            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+        // Secret keyword: type "School" anywhere on page
+        var keyBuffer = '';
+        document.addEventListener('keypress', function(e) {
+            if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
             keyBuffer += e.key;
-            if (keyBuffer.length > SECRET_KEYWORD.length) {
-                keyBuffer = keyBuffer.slice(-SECRET_KEYWORD.length);
-            }
-            if (keyBuffer === SECRET_KEYWORD) {
+            if (keyBuffer.length > 6) keyBuffer = keyBuffer.slice(-6);
+            if (keyBuffer === 'School') {
                 keyBuffer = '';
-                document.getElementById('loginModal').style.display = 'flex';
-                document.getElementById('passwordInput').focus();
+                showLoginModal();
             }
         });
 
-        document.getElementById('adminBtn').addEventListener('click', () => {
-            document.getElementById('loginModal').style.display = 'flex';
-        });
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('passwordInput').focus();
+        }
 
-        document.getElementById('closeModal').addEventListener('click', () => {
-            document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('adminBtn').addEventListener('click', showLoginModal);
+
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('loginModal').classList.add('hidden');
             document.getElementById('passwordInput').value = '';
             document.getElementById('errorMsg').classList.add('hidden');
         });
 
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const password = document.getElementById('passwordInput').value;
-            if (password === ADMIN_PASSWORD) {
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            var pwd = document.getElementById('passwordInput').value;
+            if (pwd === ADMIN_PASSWORD) {
                 isAdmin = true;
-                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('adminBtn').classList.add('hidden');
-                document.getElementById('adminPanel').style.display = 'flex';
-                enableEditMode();
+                document.getElementById('adminPanel').classList.remove('hidden');
                 document.getElementById('passwordInput').value = '';
-                showAdminMessage('Welcome Admin! You can now edit footer content.', 'success');
+                document.getElementById('errorMsg').classList.add('hidden');
+                enableEditMode();
+                showMessage('Admin mode enabled. Click any text to edit.');
             } else {
-                document.getElementById('errorMsg').textContent = 'Incorrect password! Try again.';
                 document.getElementById('errorMsg').classList.remove('hidden');
                 document.getElementById('passwordInput').value = '';
             }
         });
 
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            saveAllChanges();
-            showAdminMessage('All changes saved successfully! ✓', 'success');
+        // Allow Enter key in password field
+        document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') document.getElementById('loginBtn').click();
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            saveAllChanges();
+            showMessage('All changes saved successfully!');
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
             if (confirm('Do you want to save changes before logging out?')) {
                 saveAllChanges();
-                showAdminMessage('Changes saved! Logging out...', 'success');
-                setTimeout(() => { logout(); }, 1500);
+                showMessage('Changes saved! Logging out...');
+                setTimeout(logout, 1500);
             } else {
                 logout();
             }
@@ -601,24 +321,24 @@ Submitted on   : ${new Date().toLocaleString('en-IN')}
 
         function logout() {
             isAdmin = false;
-            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('hidden');
             document.getElementById('adminBtn').classList.remove('hidden');
             disableEditMode();
         }
 
         function enableEditMode() {
             document.body.classList.add('admin-mode');
-            document.querySelectorAll('.editable').forEach(element => {
-                element.classList.add('editable-hover');
-                element.addEventListener('click', handleEditClick);
+            document.querySelectorAll('.editable').forEach(function(el) {
+                el.classList.add('editable-hover');
+                el.addEventListener('click', handleEditClick);
             });
         }
 
         function disableEditMode() {
             document.body.classList.remove('admin-mode');
-            document.querySelectorAll('.editable').forEach(element => {
-                element.classList.remove('editable-hover');
-                element.removeEventListener('click', handleEditClick);
+            document.querySelectorAll('.editable').forEach(function(el) {
+                el.classList.remove('editable-hover');
+                el.removeEventListener('click', handleEditClick);
             });
         }
 
@@ -630,102 +350,185 @@ Submitted on   : ${new Date().toLocaleString('en-IN')}
 
         function editText(element) {
             if (!isAdmin) return;
-            const currentHTML = element.innerHTML;
-            const isMultiline = currentHTML.includes('<br') || element.id === 'footerAddress';
+            var currentHTML = element.innerHTML;
+            var currentText = element.textContent;
+            var isMultiline = currentHTML.indexOf('<br') !== -1 || element.tagName === 'P';
 
             if (isMultiline) {
-                const textarea = document.createElement('textarea');
-                textarea.value = currentHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
-                textarea.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none text-gray-800';
-                textarea.rows = 4;
-                element.replaceWith(textarea);
-                textarea.focus();
-                textarea.addEventListener('blur', () => {
-                    element.innerHTML = textarea.value.replace(/\n/g, '<br>');
-                    textarea.replaceWith(element);
+                var ta = document.createElement('textarea');
+                ta.value = currentHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+                ta.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none text-gray-800 bg-white';
+                ta.rows = 4;
+                element.replaceWith(ta);
+                ta.focus();
+                ta.addEventListener('blur', function() {
+                    element.innerHTML = ta.value.replace(/\n/g, '<br>');
+                    ta.replaceWith(element);
                     element.addEventListener('click', handleEditClick);
+                });
+                ta.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        element.innerHTML = currentHTML;
+                        ta.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    }
                 });
             } else {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = element.textContent;
-                input.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none text-gray-800';
-                element.replaceWith(input);
-                input.focus();
-                input.addEventListener('blur', () => {
-                    element.textContent = input.value;
-                    input.replaceWith(element);
+                var inp = document.createElement('input');
+                inp.type = 'text';
+                inp.value = currentText;
+                inp.className = 'w-full px-3 py-2 border-2 border-blue-500 rounded focus:outline-none text-gray-800 bg-white';
+                element.replaceWith(inp);
+                inp.focus();
+                inp.select();
+                inp.addEventListener('blur', function() {
+                    element.textContent = inp.value;
+                    inp.replaceWith(element);
                     element.addEventListener('click', handleEditClick);
                 });
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') input.blur();
+                inp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        element.textContent = inp.value;
+                        inp.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    } else if (e.key === 'Escape') {
+                        element.textContent = currentText;
+                        inp.replaceWith(element);
+                        element.addEventListener('click', handleEditClick);
+                    }
                 });
             }
         }
 
-        const FOOTER_IDS = ['footerAddress','footerEmail','footerPhone','footerCopyright','address','email','phone','copyright'];
-
         function saveAllChanges() {
-            document.querySelectorAll('.editable').forEach(el => {
-                if (el.id && !FOOTER_IDS.includes(el.id)) localStorage.setItem('admission_' + el.id, el.innerHTML);
+            var sn   = document.getElementById('schoolName');
+            var af   = document.getElementById('affiliation');
+            var addr = document.getElementById('footerAddress');
+            var em   = document.getElementById('footerEmail');
+            var ph   = document.getElementById('footerPhone');
+
+            localStorage.setItem('sharedHeaderData', JSON.stringify({
+                schoolName: sn ? sn.innerHTML : '',
+                affiliation: af ? af.innerHTML : ''
+            }));
+            localStorage.setItem('sharedFooterData', JSON.stringify({
+                address: addr ? addr.innerHTML : '',
+                email:   em  ? em.innerHTML   : '',
+                phone:   ph  ? ph.innerHTML   : ''
+            }));
+        }
+
+        function loadSharedData() {
+            try {
+                var hRaw = localStorage.getItem('sharedHeaderData');
+                var mRaw = localStorage.getItem('schoolWebsiteData');
+                var header = hRaw ? JSON.parse(hRaw) : {};
+                var main   = mRaw ? JSON.parse(mRaw) : {};
+
+                var sn = header.schoolName || main.schoolName;
+                var af = header.affiliation || main.affiliation;
+                if (sn) document.getElementById('schoolName').innerHTML = sn;
+                if (af) document.getElementById('affiliation').innerHTML = af;
+
+                var fRaw   = localStorage.getItem('sharedFooterData');
+                var footer = fRaw ? JSON.parse(fRaw) : {};
+                var fd     = footer.address ? footer : main;
+                if (fd.address) document.getElementById('footerAddress').innerHTML = fd.address;
+                if (fd.email)   document.getElementById('footerEmail').innerHTML   = fd.email;
+                if (fd.phone)   document.getElementById('footerPhone').innerHTML   = fd.phone;
+            } catch(err) {
+                console.error('loadSharedData error:', err);
+            }
+        }
+
+        function showMessage(text) {
+            var msg = document.createElement('div');
+            msg.textContent = text;
+            msg.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 text-sm font-semibold';
+            document.body.appendChild(msg);
+            setTimeout(function() { msg.remove(); }, 3000);
+        }
+
+        window.toggleMenu = function() {
+            var menu = document.getElementById('mobileMenu');
+            var bars = document.querySelectorAll('#hamburgerIcon span');
+            var isOpen = !menu.classList.contains('hidden');
+            if (isOpen) {
+                menu.classList.add('hidden');
+                bars[0].style.transform=''; bars[1].style.opacity=''; bars[2].style.transform='';
+            } else {
+                menu.classList.remove('hidden');
+                bars[0].style.transform='translateY(8px) rotate(45deg)';
+                bars[1].style.opacity='0';
+                bars[2].style.transform='translateY(-8px) rotate(-45deg)';
+            }
+        };
+
+        window.submitAdmissionForm = function() {
+            var fields = [
+                ['f_studentName','Student Name'],['f_studentCast','Student Caste'],
+                ['f_dob','Date of Birth'],['f_gender','Gender'],
+                ['f_fatherName',"Father's Name"],['f_fatherCast',"Father's Caste"],
+                ['f_motherName',"Mother's Name"],['f_motherCast',"Mother's Caste"],
+                ['f_address_input','Address'],['f_phone_input','Phone Number'],
+                ['f_email_input','Email'],['f_class','Class Applied']
+            ];
+            for (var i = 0; i < fields.length; i++) {
+                var id = fields[i][0], label = fields[i][1];
+                if (!document.getElementById(id).value.trim()) {
+                    alert('Please fill in: ' + label);
+                    document.getElementById(id).focus();
+                    return;
+                }
+            }
+            var phone = document.getElementById('f_phone_input').value.trim();
+            if (!/^\d{10}$/.test(phone)) {
+                alert('Please enter a valid 10-digit phone number.');
+                document.getElementById('f_phone_input').focus();
+                return;
+            }
+
+            document.getElementById('loadingMsg').style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+
+            var templateParams = {
+                student_name    : document.getElementById('f_studentName').value.trim(),
+                student_cast    : document.getElementById('f_studentCast').value.trim(),
+                dob             : document.getElementById('f_dob').value,
+                gender          : document.getElementById('f_gender').value,
+                father_name     : document.getElementById('f_fatherName').value.trim(),
+                father_cast     : document.getElementById('f_fatherCast').value.trim(),
+                mother_name     : document.getElementById('f_motherName').value.trim(),
+                mother_cast     : document.getElementById('f_motherCast').value.trim(),
+                address         : document.getElementById('f_address_input').value.trim(),
+                phone           : document.getElementById('f_phone_input').value.trim(),
+                parent_email    : document.getElementById('f_email_input').value.trim(),
+                class_applied   : document.getElementById('f_class').value,
+                submission_date : document.getElementById('f_date').value
+            };
+
+            emailjs.send('service_0q0hybh', 'template_ljad0rf', templateParams)
+            .then(function() {
+                document.getElementById('loadingMsg').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'block';
+                document.getElementById('successMsg').scrollIntoView({behavior:'smooth'});
+                // Reset form fields
+                ['f_studentName','f_studentCast','f_dob','f_gender','f_fatherName',
+                 'f_fatherCast','f_motherName','f_motherCast','f_address_input',
+                 'f_phone_input','f_email_input','f_class'].forEach(function(id) {
+                    document.getElementById(id).value = '';
+                });
+            })
+            .catch(function(error) {
+                document.getElementById('loadingMsg').style.display = 'none';
+                alert('Failed to send application. Please try again.\nError: ' + JSON.stringify(error));
+                console.error('EmailJS error:', error);
             });
-        }
+        };
 
-        function loadSavedContent() {
-            
-            document.querySelectorAll('.editable').forEach(el => {
-                if (FOOTER_IDS.includes(el.id)) return; // footer controlled by sharedFooterData
-                const saved = localStorage.getItem('admission_' + el.id);
-                if (saved) el.innerHTML = saved;
-            });
-        }
+        window.addEventListener('DOMContentLoaded', loadSharedData);
 
-        function showAdminMessage(msg, type) {
-            const div = document.createElement('div');
-            div.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
-            div.textContent = msg;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 3000);
-        }
-
-        function closeSuccess() {
-            document.getElementById('successOverlay').classList.remove('active');
-        }
-
-        function toggleMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-        }
-
-        // Load saved editable content
-        loadSavedContent();
-            // Apply shared header & footer AFTER local data loads (so shared always wins)
-            (function() {
-                try {
-                    var h = localStorage.getItem('sharedHeaderData');
-                    if (h) {
-                        var hd = JSON.parse(h);
-                        if (hd.schoolName) document.getElementById('schoolName').innerHTML = hd.schoolName;
-                        if (hd.affiliation) document.getElementById('affiliation').innerHTML = hd.affiliation;
-                    }
-                } catch(e) {}
-                try {
-                    var f = localStorage.getItem('sharedFooterData');
-                    if (f) {
-                        var fd = JSON.parse(f);
-                        var addr = document.getElementById('footerAddress') || document.getElementById('address');
-                        var email = document.getElementById('footerEmail') || document.getElementById('email');
-                        var phone = document.getElementById('footerPhone') || document.getElementById('phone');
-                        var copy = document.getElementById('footerCopyright') || document.getElementById('copyright');
-                        if (addr && fd.address) addr.innerHTML = fd.address;
-                        if (email && fd.email) email.innerHTML = fd.email;
-                        if (phone && fd.phone) phone.innerHTML = fd.phone;
-                        // Always apply colored copyright - from shared data or hardcoded fallback
-                        if (copy) copy.innerHTML = (fd.copyright && fd.copyright.indexOf('span') !== -1) ? fd.copyright : 'Copyright ©2025 VIVEKANANDHA SCHOOL - CBSE | Developed by @<span style="color:#ef4444;font-weight:700;">S</span><span style="color:#f97316;font-weight:700;">R</span><span style="color:#eab308;font-weight:700;">I</span><span style="color:#22c55e;font-weight:700;">R</span><span style="color:#3b82f6;font-weight:700;">A</span><span style="color:#a855f7;font-weight:700;">M</span>';
-                    }
-                } catch(e) {}
-            })();
-
+    })();
     </script>
 </body>
 </html>
