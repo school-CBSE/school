@@ -152,27 +152,15 @@
                 </div>
             </div>
 
-            <p class="section-title">Father's Details</p>
+            <p class="section-title">Parent's Details</p>
             <div class="grid md:grid-cols-2 gap-5">
                 <div>
                     <label class="form-label">Father's Name <span class="text-red-500">*</span></label>
                     <input type="text" id="f_fatherName" class="form-input" placeholder="Enter father's full name">
                 </div>
                 <div>
-                    <label class="form-label">Father's Caste <span class="text-red-500">*</span></label>
-                    <input type="text" id="f_fatherCast" class="form-input" placeholder="Enter caste">
-                </div>
-            </div>
-
-            <p class="section-title">Mother's Details</p>
-            <div class="grid md:grid-cols-2 gap-5">
-                <div>
                     <label class="form-label">Mother's Name <span class="text-red-500">*</span></label>
                     <input type="text" id="f_motherName" class="form-input" placeholder="Enter mother's full name">
-                </div>
-                <div>
-                    <label class="form-label">Mother's Caste <span class="text-red-500">*</span></label>
-                    <input type="text" id="f_motherCast" class="form-input" placeholder="Enter caste">
                 </div>
             </div>
 
@@ -469,8 +457,8 @@
             var fields = [
                 ['f_studentName','Student Name'],['f_studentCast','Student Caste'],
                 ['f_dob','Date of Birth'],['f_gender','Gender'],
-                ['f_fatherName',"Father's Name"],['f_fatherCast',"Father's Caste"],
-                ['f_motherName',"Mother's Name"],['f_motherCast',"Mother's Caste"],
+                ['f_fatherName',"Father's Name"],
+                ['f_motherName',"Mother's Name"],
                 ['f_address_input','Address'],['f_phone_input','Phone Number'],
                 ['f_email_input','Email'],['f_class','Class Applied']
             ];
@@ -498,9 +486,7 @@
                 dob             : document.getElementById('f_dob').value,
                 gender          : document.getElementById('f_gender').value,
                 father_name     : document.getElementById('f_fatherName').value.trim(),
-                father_cast     : document.getElementById('f_fatherCast').value.trim(),
                 mother_name     : document.getElementById('f_motherName').value.trim(),
-                mother_cast     : document.getElementById('f_motherCast').value.trim(),
                 address         : document.getElementById('f_address_input').value.trim(),
                 phone           : document.getElementById('f_phone_input').value.trim(),
                 parent_email    : document.getElementById('f_email_input').value.trim(),
@@ -515,7 +501,7 @@
                 document.getElementById('successMsg').scrollIntoView({behavior:'smooth'});
                 // Reset form fields
                 ['f_studentName','f_studentCast','f_dob','f_gender','f_fatherName',
-                 'f_fatherCast','f_motherName','f_motherCast','f_address_input',
+                 'f_motherName','f_address_input',
                  'f_phone_input','f_email_input','f_class'].forEach(function(id) {
                     document.getElementById(id).value = '';
                 });
