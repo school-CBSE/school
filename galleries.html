@@ -80,6 +80,12 @@
             right: 20px;
         }
     </style>
+
+    <!-- ✅ MongoDB API Connection -->
+    <script src="db.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000';
+    </script>
 </head>
 <body class="bg-gray-50">
     <!-- Add Image Modal -->
@@ -652,42 +658,54 @@
             }, 3000);
         }
 
-        // Save all changes
-        function saveAllChanges() {
-            const data = {
-                galleryDesc: document.getElementById('galleryDesc').innerHTML,
-                // Footer excluded - controlled by sharedFooterData
-                galleryImages: galleryImages
-            };
-            
-            localStorage.setItem('galleriesPageData', JSON.stringify(data));
+        
+        // ✅ Save all changes to MongoDB
+        async function saveAllChanges() {
+            const data = {};
+            document.querySelectorAll('[id]').forEach(el => {
+                if (el.tagName === 'IMG') data[el.id] = el.src;
+                else if (el.id && !['loginModal','adminPanel','adminBtn','saveBtn','logoutBtn','errorMsg','passwordInput','loginForm','mobileMenu','menuToggle','hamburgerIcon'].includes(el.id)) {
+                    const txt = el.innerHTML;
+                    if (txt && txt.trim()) data[el.id] = txt;
+                }
+            });
+            try {
+                showMessage('Saving...', 'info');
+                const res = await fetch(`${API_URL}/api/content/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showMessage('✅ All changes saved permanently!', 'success');
+                } else {
+                    showMessage('❌ Save failed. Try again.', 'error');
+                }
+            } catch (err) {
+                showMessage('❌ Cannot connect to server. Is it running?', 'error');
+            }
         }
 
-        // Load saved changes
-        function loadSavedChanges() {
-            const savedData = localStorage.getItem('galleriesPageData');
-            if (!savedData) {
-                renderGallery();
-                return;
-            }
-            
+
+        
+        // ✅ Load saved changes from MongoDB
+        async function loadSavedChanges() {
             try {
-                const data = JSON.parse(savedData);
-                
-                if (data.galleryDesc) document.getElementById('galleryDesc').innerHTML = data.galleryDesc;
-                // Footer loaded from sharedFooterData
-                
-                if (data.galleryImages && Array.isArray(data.galleryImages)) {
-                    galleryImages = data.galleryImages;
-                }
-                
-                renderGallery();
-                
-            } catch (error) {
-                console.error('Error loading saved data:', error);
-          
+                const res = await fetch(`${API_URL}/api/content`);
+                const data = await res.json();
+                Object.keys(data).forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el) {
+                        if (el.tagName === 'IMG') el.src = data[key];
+                        else el.innerHTML = data[key];
+                    }
+                });
+            } catch (err) {
+                console.log('Could not load from server, using defaults.');
             }
         }
+
 
         // Load saved changes on page load
         window.addEventListener('DOMContentLoaded', () => {

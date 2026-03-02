@@ -397,38 +397,39 @@
             }
         }
 
-        // Edit image function
+        // Edit image function - uploads to Cloudinary via backend
         function editImage(elementId) {
             if (!isAdmin) return;
-            
-            const imgElement = document.getElementById(elementId);
-            const width = imgElement.naturalWidth || imgElement.width;
-            const height = imgElement.naturalHeight || imgElement.height;
-            const displayWidth = imgElement.offsetWidth;
-            const displayHeight = imgElement.offsetHeight;
-            
-            const message = `Current image dimensions:\n` +
-                          `Original: ${width} x ${height} pixels\n` +
-                          `Display: ${displayWidth} x ${displayHeight} pixels\n\n` +
-                          `Recommended: ${width} x ${height} pixels or similar aspect ratio\n\n` +
-                          `Enter new image URL:`;
-            
-            const newUrl = prompt(message);
-            if (newUrl && newUrl.trim() !== '') {
-                // Show loading message
-                showMessage('Loading new image...', 'info');
-                
-                // Create temporary image to check if URL is valid
-                const tempImg = new Image();
-                tempImg.onload = function() {
-                    imgElement.src = newUrl;
-                    showMessage(`Image updated successfully! (${this.width} x ${this.height} pixels)`, 'success');
-                };
-                tempImg.onerror = function() {
-                    showMessage('Error: Could not load image. Please check the URL.', 'error');
-                };
-                tempImg.src = newUrl;
-            }
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (!file) return;
+
+                showMessage('Uploading image...', 'info');
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('key', elementId);
+
+                try {
+                    const response = await fetch(`${API_URL}/api/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById(elementId).src = result.imageUrl;
+                        showMessage('✅ Image uploaded permanently!', 'success');
+                    } else {
+                        showMessage('❌ Upload failed. Try again.', 'error');
+                    }
+                } catch (err) {
+                    showMessage('❌ Cannot connect to server.', 'error');
+                }
+            };
+            input.click();
         }
 
         // Edit facility image
@@ -509,102 +510,91 @@
             }, 3000);
         }
 
-        // Save all changes to localStorage
-        function saveAllChanges() {
+        // ✅ Backend API URL - Change this when you deploy
+        const API_URL = 'http://localhost:5000';
+
+        // Save all changes to MongoDB
+        async function saveAllChanges() {
             const data = {
-                // Header
                 schoolName: document.getElementById('schoolName').innerHTML,
                 affiliation: document.getElementById('affiliation').innerHTML,
-                
-                // Images
                 heroImage: document.getElementById('heroImage').src,
                 correspondentImage: document.getElementById('correspondentImage').src,
-                
-                // Welcome section
                 welcomeTitle: document.getElementById('welcomeTitle').innerHTML,
                 welcomeText: document.getElementById('welcomeText').innerHTML,
                 aboutText: document.getElementById('aboutText').innerHTML,
                 philosophy: document.getElementById('philosophy').innerHTML,
-                
-                // Correspondent
                 correspondentName: document.getElementById('correspondentName').innerHTML,
                 correspondentMessage: document.getElementById('correspondentMessage').innerHTML,
-                
-                // News items
-                newsItems: Array.from(document.querySelectorAll('.news-item')).map(item => {
-                    return item.textContent.replace('×', '').trim();
-                }),
-                
-                // Facilities
-                facilities: Array.from(document.querySelectorAll('.facility-card')).map(card => ({
+                newsItems: JSON.stringify(Array.from(document.querySelectorAll('.news-item')).map(item => item.textContent.replace('×', '').trim())),
+                facilities: JSON.stringify(Array.from(document.querySelectorAll('.facility-card')).map(card => ({
                     image: card.querySelector('.facility-image').src,
                     icon: card.querySelector('.facility-icon').textContent,
                     title: card.querySelector('.facility-title').textContent,
                     desc: card.querySelector('.facility-desc').innerHTML
-                })),
-                
-                // Footer
+                }))),
                 address: document.getElementById('address').innerHTML,
                 email: document.getElementById('email').innerHTML,
                 phone: document.getElementById('phone').innerHTML,
             };
-            
-            localStorage.setItem('schoolWebsiteData', JSON.stringify(data));
-            // Sync header to all pages
-            localStorage.setItem('sharedHeaderData', JSON.stringify({
-                schoolName: data.schoolName,
-                affiliation: data.affiliation
-            }));
-            // Sync footer to all pages
-            localStorage.setItem('sharedFooterData', JSON.stringify({
-                address: data.address,
-                email: data.email,
-                phone: data.phone,
-            }));
+
+            try {
+                showMessage('Saving...', 'info');
+                const response = await fetch(`${API_URL}/api/content/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('✅ All changes saved permanently!', 'success');
+                } else {
+                    showMessage('❌ Save failed. Try again.', 'error');
+                }
+            } catch (err) {
+                showMessage('❌ Cannot connect to server. Is it running?', 'error');
+                console.error(err);
+            }
         }
 
-        // Load saved changes from localStorage
-        function loadSavedChanges() {
-            const savedData = localStorage.getItem('schoolWebsiteData');
-            if (!savedData) return;
-            
+        // Load saved changes from MongoDB
+        async function loadSavedChanges() {
             try {
-                const data = JSON.parse(savedData);
-                
-                // Header
+                const response = await fetch(`${API_URL}/api/content`);
+                const data = await response.json();
+
                 if (data.schoolName) document.getElementById('schoolName').innerHTML = data.schoolName;
                 if (data.affiliation) document.getElementById('affiliation').innerHTML = data.affiliation;
-                
-                // Images
                 if (data.heroImage) document.getElementById('heroImage').src = data.heroImage;
                 if (data.correspondentImage) document.getElementById('correspondentImage').src = data.correspondentImage;
-                
-                // Welcome section
                 if (data.welcomeTitle) document.getElementById('welcomeTitle').innerHTML = data.welcomeTitle;
                 if (data.welcomeText) document.getElementById('welcomeText').innerHTML = data.welcomeText;
                 if (data.aboutText) document.getElementById('aboutText').innerHTML = data.aboutText;
                 if (data.philosophy) document.getElementById('philosophy').innerHTML = data.philosophy;
-                
-                // Correspondent
                 if (data.correspondentName) document.getElementById('correspondentName').innerHTML = data.correspondentName;
                 if (data.correspondentMessage) document.getElementById('correspondentMessage').innerHTML = data.correspondentMessage;
-                
-                // News items
-                if (data.newsItems && data.newsItems.length > 0) {
-                    const newsContainer = document.getElementById('newsEvents');
-                    newsContainer.innerHTML = '';
-                    data.newsItems.forEach(newsText => {
-                        const newItem = document.createElement('p');
-                        newItem.className = 'news-item editable';
-                        newItem.textContent = newsText;
-                        newsContainer.appendChild(newItem);
-                    });
+                if (data.address) document.getElementById('address').innerHTML = data.address;
+                if (data.email) document.getElementById('email').innerHTML = data.email;
+                if (data.phone) document.getElementById('phone').innerHTML = data.phone;
+
+                if (data.newsItems) {
+                    const newsItems = JSON.parse(data.newsItems);
+                    if (newsItems.length > 0) {
+                        const newsContainer = document.getElementById('newsEvents');
+                        newsContainer.innerHTML = '';
+                        newsItems.forEach(newsText => {
+                            const newItem = document.createElement('p');
+                            newItem.className = 'news-item editable';
+                            newItem.textContent = newsText;
+                            newsContainer.appendChild(newItem);
+                        });
+                    }
                 }
-                
-                // Facilities
-                if (data.facilities && data.facilities.length > 0) {
+
+                if (data.facilities) {
+                    const facilities = JSON.parse(data.facilities);
                     const facilityCards = document.querySelectorAll('.facility-card');
-                    data.facilities.forEach((facility, index) => {
+                    facilities.forEach((facility, index) => {
                         if (facilityCards[index]) {
                             const card = facilityCards[index];
                             if (facility.image) card.querySelector('.facility-image').src = facility.image;
@@ -614,17 +604,8 @@
                         }
                     });
                 }
-                
-                // Footer
-                if (data.address) document.getElementById('address').innerHTML = data.address;
-                if (data.email) document.getElementById('email').innerHTML = data.email;
-                if (data.phone) document.getElementById('phone').innerHTML = data.phone;
-                
-                if (copyrightEl) {
-                }
-                
-            } catch (error) {
-                console.error('Error loading saved data:', error);
+            } catch (err) {
+                console.log('Could not load from server, using defaults.');
             }
         }
 

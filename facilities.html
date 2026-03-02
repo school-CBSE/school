@@ -25,6 +25,12 @@
             opacity: 1;
         }
     </style>
+
+    <!-- ✅ MongoDB API Connection -->
+    <script src="db.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000';
+    </script>
 </head>
 <body class="bg-gray-50">
     <!-- Admin Panel (secret keyword: type "School" anywhere on the page) -->
@@ -526,31 +532,36 @@
             }
         }
 
-        // Edit image function
+        
+        // Edit image function - uploads to Cloudinary via backend
         function editImage(elementId) {
             if (!isAdmin) return;
-            
-            const imgElement = document.getElementById(elementId);
-            const width = imgElement.naturalWidth || imgElement.width;
-            const height = imgElement.naturalHeight || imgElement.height;
-            
-            const message = `Current image dimensions: ${width} x ${height} pixels\n\nEnter new image URL:`;
-            
-            const newUrl = prompt(message);
-            if (newUrl && newUrl.trim() !== '') {
-                showMessage('Loading new image...', 'info');
-                
-                const tempImg = new Image();
-                tempImg.onload = function() {
-                    imgElement.src = newUrl;
-                    showMessage('Image updated successfully!', 'success');
-                };
-                tempImg.onerror = function() {
-                    showMessage('Error: Could not load image. Please check the URL.', 'error');
-                };
-                tempImg.src = newUrl;
-            }
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (!file) return;
+                showMessage('Uploading image...', 'info');
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('key', elementId);
+                try {
+                    const res = await fetch(`${API_URL}/api/upload`, { method: 'POST', body: formData });
+                    const result = await res.json();
+                    if (result.success) {
+                        document.getElementById(elementId).src = result.imageUrl;
+                        showMessage('✅ Image uploaded permanently!', 'success');
+                    } else {
+                        showMessage('❌ Upload failed. Try again.', 'error');
+                    }
+                } catch (err) {
+                    showMessage('❌ Cannot connect to server.', 'error');
+                }
+            };
+            input.click();
         }
+
 
         // Show message
         function showMessage(text, type = 'success') {
@@ -567,100 +578,54 @@
             }, 3000);
         }
 
-        // Save all changes
-        function saveAllChanges() {
-            const data = {
-                // Library
-                libraryMainImage: document.getElementById('libraryMainImage').src,
-                libraryMainLabel: document.getElementById('libraryMainLabel').innerHTML,
-                libraryTitle: document.getElementById('libraryTitle').innerHTML,
-                libraryDesc1: document.getElementById('libraryDesc1').innerHTML,
-                libraryDesc2: document.getElementById('libraryDesc2').innerHTML,
-                libraryGallery1: document.getElementById('libraryGallery1').src,
-                libraryGallery2: document.getElementById('libraryGallery2').src,
-                libraryGallery3: document.getElementById('libraryGallery3').src,
-                libraryGallery4: document.getElementById('libraryGallery4').src,
-                
-                // Smart Class
-                smartClassImage: document.getElementById('smartClassImage').src,
-                smartClassLabel: document.getElementById('smartClassLabel').innerHTML,
-                smartClassTitle: document.getElementById('smartClassTitle').innerHTML,
-                smartClassDesc1: document.getElementById('smartClassDesc1').innerHTML,
-                smartClassDesc2: document.getElementById('smartClassDesc2').innerHTML,
-                
-                // Laboratory
-                labImage: document.getElementById('labImage').src,
-                labLabel: document.getElementById('labLabel').innerHTML,
-                labTitle: document.getElementById('labTitle').innerHTML,
-                labDesc: document.getElementById('labDesc').innerHTML,
-                
-                // Sports
-                sportsImage: document.getElementById('sportsImage').src,
-                sportsLabel: document.getElementById('sportsLabel').innerHTML,
-                sportsTitle: document.getElementById('sportsTitle').innerHTML,
-                sportsDesc: document.getElementById('sportsDesc').innerHTML,
-                
-                // Awards
-                awardsImage: document.getElementById('awardsImage').src,
-                awardsLabel: document.getElementById('awardsLabel').innerHTML,
-                awardsTitle: document.getElementById('awardsTitle').innerHTML,
-                awardsDesc: document.getElementById('awardsDesc').innerHTML,
-                
-                // Extra Curricular
-                extraCurricularTitle: document.getElementById('extraCurricularTitle').innerHTML,
-                extraCurricularDesc1: document.getElementById('extraCurricularDesc1').innerHTML,
-                extraCurricularDesc2: document.getElementById('extraCurricularDesc2').innerHTML,
-                activityImage1: document.getElementById('activityImage1').src,
-                activityImage2: document.getElementById('activityImage2').src,
-                activityImage3: document.getElementById('activityImage3').src,
-                activityImage4: document.getElementById('activityImage4').src,
-                artsImage: document.getElementById('artsImage').src,
-                artsLabel: document.getElementById('artsLabel').innerHTML,
-                
-                // Transport
-                transportImage: document.getElementById('transportImage').src,
-                transportLabel: document.getElementById('transportLabel').innerHTML,
-                transportTitle: document.getElementById('transportTitle').innerHTML,
-                transportDesc: document.getElementById('transportDesc').innerHTML,
-                
-                // Campus
-                campusImage: document.getElementById('campusImage').src,
-                campusLabel: document.getElementById('campusLabel').innerHTML,
-                campusTitle: document.getElementById('campusTitle').innerHTML,
-                campusDesc: document.getElementById('campusDesc').innerHTML,
-                
-                // Footer excluded - controlled by sharedFooterData from school-website.html
-            };
-            
-            localStorage.setItem('facilitiesPageData', JSON.stringify(data));
-        }
-
-        // Load saved changes
-        function loadSavedChanges() {
-            const savedData = localStorage.getItem('facilitiesPageData');
-            if (!savedData) return;
-            
+        
+        // ✅ Save all changes to MongoDB
+        async function saveAllChanges() {
+            const data = {};
+            document.querySelectorAll('[id]').forEach(el => {
+                if (el.tagName === 'IMG') data[el.id] = el.src;
+                else if (el.id && !['loginModal','adminPanel','adminBtn','saveBtn','logoutBtn','errorMsg','passwordInput','loginForm','mobileMenu','menuToggle','hamburgerIcon'].includes(el.id)) {
+                    const txt = el.innerHTML;
+                    if (txt && txt.trim()) data[el.id] = txt;
+                }
+            });
             try {
-                const data = JSON.parse(savedData);
-                
-                // Load all saved data
-                const FOOTER_IDS = ['address','email','phone','copyright','footerAddress','footerEmail','footerPhone','footerCopyright'];
-                Object.keys(data).forEach(key => {
-                    if (FOOTER_IDS.includes(key)) return;
-                    const element = document.getElementById(key);
-                    if (element) {
-                        if (element.tagName === 'IMG') {
-                            element.src = data[key];
-                        } else {
-                            element.innerHTML = data[key];
-                        }
-                    }
+                showMessage('Saving...', 'info');
+                const res = await fetch(`${API_URL}/api/content/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data })
                 });
-                
-            } catch (error) {
-                console.error('Error loading saved data:', error);
+                const result = await res.json();
+                if (result.success) {
+                    showMessage('✅ All changes saved permanently!', 'success');
+                } else {
+                    showMessage('❌ Save failed. Try again.', 'error');
+                }
+            } catch (err) {
+                showMessage('❌ Cannot connect to server. Is it running?', 'error');
             }
         }
+
+
+        
+        // ✅ Load saved changes from MongoDB
+        async function loadSavedChanges() {
+            try {
+                const res = await fetch(`${API_URL}/api/content`);
+                const data = await res.json();
+                Object.keys(data).forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el) {
+                        if (el.tagName === 'IMG') el.src = data[key];
+                        else el.innerHTML = data[key];
+                    }
+                });
+            } catch (err) {
+                console.log('Could not load from server, using defaults.');
+            }
+        }
+
 
         // Load saved changes on page load
         window.addEventListener('DOMContentLoaded', () => {
